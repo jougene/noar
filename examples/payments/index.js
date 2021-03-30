@@ -1,9 +1,11 @@
 const User = require('./User')
 const Payment = require('./Payment')
 
-const db = require('../../src/bootstrap')({ models: [User, Payment] })
+const { connect, bootstrap } = require('../../src/bootstrap')
 
 ;(async () => {
+  const db = await connect(({ models: [User, Payment] }))
+
   await db.schema.createTable('users', t => {
     t.increments()
     t.string('name').notNullable()
@@ -24,6 +26,8 @@ const db = require('../../src/bootstrap')({ models: [User, Payment] })
     t.foreign('user_id').references('id').inTable('users')
   })
 
+  await bootstrap(({ models: [User, Payment] }))
+
   const users = await Promise.all([
     User.create({ name: 'Eugene', email: 'test@email.com' }),
     User.create({ name: 'Vasya', email: 'vasya@email.com' })
@@ -32,9 +36,9 @@ const db = require('../../src/bootstrap')({ models: [User, Payment] })
   const [user, user2] = users
 
   await Promise.all([
-    Payment.create({ amount: 10000, user }),
-    Payment.create({ amount: 10000, user: user2 }),
-    Payment.create({ amount: 9999, user: user2, status: 'charged', chargedAt: new Date() })
+    Payment.create({ amount: 10000, user })
+    // Payment.create({ amount: 10000, user: user2 }),
+    // Payment.create({ amount: 9999, user: user2, status: 'charged', chargedAt: new Date() })
   ])
 
   // const newPayments = await Payment.new()
@@ -42,9 +46,8 @@ const db = require('../../src/bootstrap')({ models: [User, Payment] })
   // console.log({ new: newPayments })
   // console.log({ charged: await Payment.charged() })
 
-  // console.log(Payment.hasRelation('user'))
-  console.log({ withUser: await Payment.with('user') })
-  // console.log({ users: await User.with('payments') })
+  // await Payment.with('user')
+  console.log(await Payment.with('user'))
 
   process.exit(0)
 })()

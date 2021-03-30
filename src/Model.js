@@ -64,8 +64,11 @@ class Model {
       if (relationType === 'belongsTo') {
         relation = relation[relationType]
         const foreignKey = `${singularize(relation.table)}_id`
+        const foreignSelects = relation.metadata.columns.map(c => `${relation.table}.${c} as ${singularize(relation.table)}__${c}`)
+        // replace with actual columns, not *
+        const selects = [`${this.table}.*`].concat(foreignSelects)
 
-        return qb.join(relation.table, `${this.table}.${foreignKey}`, `${relation.table}.id`).select(`${this.table}.*`, `${relation.table}.*`)
+        return qb.join(relation.table, `${this.table}.${foreignKey}`, `${relation.table}.id`).select(selects)
       }
 
       return qb
