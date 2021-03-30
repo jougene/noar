@@ -1,0 +1,40 @@
+{
+  "name": "@jougene/noar",
+  "version": "0.0.1",
+  "author": "Eugene Sinitsyn",
+  "keywords": [],
+  "description": "NodeJS ActiveRecord",
+  "homepage": "https://github.com/jougene/noar#readme",
+  "main": "index.js",
+  "directories": {
+    "test": "test"
+  },
+  "scripts": {
+    "example": "echo 123",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/jougene/noar.git"
+  },
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/jougene/noar/issues"
+  },
+  "dependencies": {
+    "inflected": "^2.1.0",
+    "knex": "^0.95.4",
+    "lodash": "^4.17.21"
+  },
+  "devDependencies": {
+    "babel-eslint": "^10.1.0",
+    "eslint": "^7.23.0",
+    "eslint-config-standard": "^16.0.2",
+    "eslint-plugin-mocha": "^8.1.0",
+    "eslint-plugin-node": "^11.1.0",
+    "eslint-plugin-promise": "^4.3.1",
+    "eslint-plugin-standard": "^5.0.0",
+    "mocha": "^8.3.2",
+    "sqlite3": "^5.0.2"
+  }
+}
