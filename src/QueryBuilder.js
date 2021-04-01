@@ -26,9 +26,9 @@ class QueryBuilder {
   }
 
   with (...relationsNames) {
-    this.qb = relationsNames.reduce((qb, name) => {
+    relationsNames.reduce((qb, name) => {
       if (!this.model.hasRelation(name)) {
-        throw new Error(`Unknown relation ${name}`)
+        throw new Error(`Unknown relation "${name}". Available relations for this model: [${this.model.relationNames.join(', ')}]`)
       }
 
       let relation = this.model.relations[name]
@@ -79,7 +79,7 @@ class QueryBuilder {
   }
 
   where (...args) {
-    this.qb = this.qb.where(...args)
+    this.qb.where(...args)
 
     return this
   }
