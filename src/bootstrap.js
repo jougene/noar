@@ -1,6 +1,7 @@
 const _ = require('lodash')
 const knex = require('knex')
-const baseModel = require('./Model')
+const BaseModel = require('./Model')
+const QueryBuilder = require('./QueryBuilder')
 
 let connection
 
@@ -54,11 +55,7 @@ const connect = async (config) => {
 const bootstrap = async (config) => {
   const { models } = config
 
-  baseModel.db = connection
-
-  baseModel.where = function (args) {
-    return this.db(this.table).where(args)
-  }
+  BaseModel.db = connection
 
   models.forEach(async model => {
     // metadata (to know what columns we have)
@@ -70,7 +67,7 @@ const bootstrap = async (config) => {
     const { scopes } = model
 
     Object.entries(scopes).forEach(([key, fn]) => {
-      model[key] = () => fn(model.db(model.table))
+      model[key] = () => new QueryBuilder(model, fn(model.db(model.table)))
     })
   })
 }

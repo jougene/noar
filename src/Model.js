@@ -1,7 +1,6 @@
 const _ = require('lodash')
-const { singularize } = require('inflected')
 
-const RELATIONS = ['belongsTo', 'hasMany', 'hasOne']
+const QueryBuilder = require('./QueryBuilder')
 
 class Model {
   static db
@@ -12,6 +11,11 @@ class Model {
 
   static first () {
     return this.db(this.table).first()
+  }
+
+  static where (...args) {
+    // add correct relations
+    return new QueryBuilder(this, this.db(this.table)).where(...args)
   }
 
   static async create (properties) {
@@ -50,31 +54,7 @@ class Model {
   }
 
   static with (...relationsNames) {
-    const qb = relationsNames.reduce((qb, name) => {
-      if (!this.hasRelation(name)) {
-        throw new Error(`Unknown relation ${name}`)
-      }
-
-      let relation = this.relations[name]
-      const relationType = Object.keys(relation).filter(r => RELATIONS.includes(r))[0]
-      if (!relationType) {
-        throw new Error(`Unknown relation type for relation [${name}]`)
-      }
-
-      if (relationType === 'belongsTo') {
-        relation = relation[relationType]
-        const foreignKey = `${singularize(relation.table)}_id`
-        const foreignSelects = relation.metadata.columns.map(c => `${relation.table}.${c} as ${singularize(relation.table)}__${c}`)
-        // replace with actual columns, not *
-        const selects = [`${this.table}.*`].concat(foreignSelects)
-
-        return qb.join(relation.table, `${this.table}.${foreignKey}`, `${relation.table}.id`).select(selects)
-      }
-
-      return qb
-    }, this.db(this.table))
-
-    return qb
+    return new QueryBuilder(this, this.db(this.table)).with(...relationsNames)
   }
 
   static get relationNames () {

@@ -36,18 +36,15 @@ const { connect, bootstrap } = require('../../src/bootstrap')
   const [user, user2] = users
 
   await Promise.all([
-    Payment.create({ amount: 10000, user })
-    // Payment.create({ amount: 10000, user: user2 }),
-    // Payment.create({ amount: 9999, user: user2, status: 'charged', chargedAt: new Date() })
+    Payment.create({ amount: 10000, user }),
+    Payment.create({ amount: 10000, user: user2 }),
+    Payment.create({ amount: 9999, user: user2, status: 'charged', chargedAt: new Date() })
   ])
 
-  // const newPayments = await Payment.new()
-
-  // console.log({ new: newPayments })
-  // console.log({ charged: await Payment.charged() })
-
-  // await Payment.with('user')
-  console.log(await Payment.with('user'))
+  // console.log({ newWithUser: await Payment.new().with('user') })
+  // console.log({ withUserAndNew: await Payment.with('user').new() })
+  // console.log({ where: await Payment.with('user').where({ amount: 9999 }) })
+  console.log({ complex: await Payment.new().with('user').where({ amount: 10000 }) })
 
   process.exit(0)
 })()
