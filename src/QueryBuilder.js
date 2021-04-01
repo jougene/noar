@@ -8,9 +8,21 @@ class QueryBuilder {
     this.qb = qb
 
     // Add all scopes back to query builder for chaining works!
-    Object.entries(model.scopes).forEach(([key, fn]) => {
+    Object.entries(model.scopes || {}).forEach(([key, fn]) => {
       this[key] = () => new QueryBuilder(model, fn(this.qb))
     })
+  }
+
+  first () {
+    this.qb.first()
+
+    return this
+  }
+
+  find (id) {
+    this.qb.where({ id }).first()
+
+    return this
   }
 
   with (...relationsNames) {
@@ -23,6 +35,31 @@ class QueryBuilder {
       const relationType = Object.keys(relation).filter(r => RELATIONS.includes(r))[0]
       if (!relationType) {
         throw new Error(`Unknown relation type for relation [${name}]`)
+      }
+
+      if (relationType === 'hasOne') {
+        relation = relation[relationType]
+        const foreignKey = `${relation.table}.${singularize(this.model.table)}_id`
+        const selfKey = `${this.model.table}.id`
+
+        const foreignSelects = relation.metadata.columns.map(c => `${relation.table}.${c} as ${name}__${c}`)
+
+        // replace with actual columns, not *
+        const selects = [`${this.model.table}.*`].concat(foreignSelects)
+
+        return qb.leftJoin(relation.table, selfKey, foreignKey).select(selects)
+      }
+
+      if (relationType === 'hasMany') {
+        relation = relation[relationType]
+        const foreignKey = `${relation.table}.${singularize(this.model.table)}_id`
+        const selfKey = `${this.model.table}.id`
+        const foreignSelects = relation.metadata.columns.map(c => `${relation.table}.${c} as ${relation.table}__${c}`)
+
+        // replace with actual columns, not *
+        const selects = [`${this.model.table}.*`].concat(foreignSelects)
+
+        return qb.leftJoin(relation.table, selfKey, foreignKey).select(selects)
       }
 
       if (relationType === 'belongsTo') {

@@ -5,12 +5,20 @@ const QueryBuilder = require('./QueryBuilder')
 class Model {
   static db
 
-  static all () {
+  static get qb () {
     return this.db(this.table)
   }
 
+  static all () {
+    return this.qb
+  }
+
   static first () {
-    return this.db(this.table).first()
+    return new QueryBuilder(this, this.qb).first()
+  }
+
+  static find (id) {
+    return new QueryBuilder(this, this.qb).find(id)
   }
 
   static where (...args) {
@@ -20,7 +28,7 @@ class Model {
 
   static async create (properties) {
     const entity = new this()
-    const { table, relations, defaults } = this
+    const { relations, defaults } = this
 
     const keys = Object.keys(properties)
 
@@ -45,8 +53,8 @@ class Model {
       return acc
     }, {})
 
-    const [id] = await this.db(table).insert(snakeCased)
-    const row = await this.db(table).where({ id }).first()
+    const [id] = await this.qb.insert(snakeCased)
+    const row = await this.qb.where({ id }).first()
 
     Object.assign(entity, row)
 

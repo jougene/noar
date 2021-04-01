@@ -7,7 +7,8 @@ class User extends Model {
 
   static get relations () {
     return {
-      payments: { hasMany: require('./Payment') }
+      payments: { hasMany: require('./Payment') },
+      personal: { hasOne: require('./UserPersonal') }
     }
   }
 

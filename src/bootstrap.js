@@ -64,7 +64,7 @@ const bootstrap = async (config) => {
     model.metadata.columns = Object.keys(columnInfo)
 
     // scopes
-    const { scopes } = model
+    const { scopes = {} } = model
 
     Object.entries(scopes).forEach(([key, fn]) => {
       model[key] = () => new QueryBuilder(model, fn(model.db(model.table)))
