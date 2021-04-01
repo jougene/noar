@@ -1,3 +1,4 @@
+const _ = require('lodash')
 const { singularize } = require('inflected')
 
 const RELATIONS = ['belongsTo', 'hasMany', 'hasOne']
@@ -14,19 +15,17 @@ class QueryBuilder {
   }
 
   first () {
-    this.qb.first()
+    this.qb = this.qb.first()
 
     return this
   }
 
   find (id) {
-    this.qb.where({ id }).first()
-
-    return this
+    return this.where({ id }).first()
   }
 
   with (...relationsNames) {
-    relationsNames.reduce((qb, name) => {
+    this.qb = relationsNames.reduce((qb, name) => {
       if (!this.model.hasRelation(name)) {
         throw new Error(`Unknown relation "${name}". Available relations for this model: [${this.model.relationNames.join(', ')}]`)
       }
@@ -79,7 +78,20 @@ class QueryBuilder {
   }
 
   where (...args) {
-    this.qb.where(...args)
+    const normalizedArgs = args.reduce((acc, arg) => {
+      if (_.isObject(arg)) {
+        return Object.entries(arg).reduce((acc, [k, v]) => {
+          console.log(this.model.relations)
+          acc[`${this.model.table}.${k}`] = v
+
+          return acc
+        }, {})
+      }
+      return args
+    }, [])
+
+    // normalize objects with relations
+    this.qb = this.qb.where(normalizedArgs)
 
     return this
   }

@@ -23,7 +23,7 @@ class Model {
 
   static where (...args) {
     // add correct relations
-    return new QueryBuilder(this, this.db(this.table)).where(...args)
+    return new QueryBuilder(this, this.qb).where(...args)
   }
 
   static async create (properties) {
@@ -62,7 +62,7 @@ class Model {
   }
 
   static with (...relationsNames) {
-    return new QueryBuilder(this, this.db(this.table)).with(...relationsNames)
+    return new QueryBuilder(this, this.qb).with(...relationsNames)
   }
 
   static get relationNames () {
