@@ -10,8 +10,9 @@
     "test": "test"
   },
   "scripts": {
-    "example": "echo 123",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "examples:payments:print": "node examples/payments",
+    "examples:payments:repl": "DEBUG=knex:query,knex:bindings nodemon --experimental-repl-await examples/payments/repl.js",
+    "test": ""
   },
   "repository": {
     "type": "git",
@@ -26,6 +27,9 @@
     "knex": "^0.95.4",
     "lodash": "^4.17.21"
   },
+  "nodemonConfig": {
+    "restartable": false
+  },
   "devDependencies": {
     "babel-eslint": "^10.1.0",
     "eslint": "^7.23.0",
@@ -34,6 +38,7 @@
     "eslint-plugin-node": "^11.1.0",
     "eslint-plugin-promise": "^4.3.1",
     "mocha": "^8.3.2",
+    "nodemon": "^2.0.7",
     "sqlite3": "^5.0.2"
   }
 }
