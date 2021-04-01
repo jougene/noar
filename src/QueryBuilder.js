@@ -1,5 +1,5 @@
 const _ = require('lodash')
-const { singularize } = require('inflected')
+const { singularize, pluralize } = require('inflected')
 
 const RELATIONS = ['belongsTo', 'hasMany', 'hasOne']
 
@@ -81,8 +81,12 @@ class QueryBuilder {
     const normalizedArgs = args.reduce((acc, arg) => {
       if (_.isObject(arg)) {
         return Object.entries(arg).reduce((acc, [k, v]) => {
-          console.log(this.model.relations)
-          acc[`${this.model.table}.${k}`] = v
+          if (this.model.hasRelation(pluralize(k))) {
+            const relation = this.model.relations[pluralize(k)]
+            console.log(relation)
+          } else {
+            acc[`${this.model.table}.${k}`] = v
+          }
 
           return acc
         }, {})
