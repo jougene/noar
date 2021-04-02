@@ -48,6 +48,7 @@ module.exports = async () => {
   await Promise.all([
     Payment.create({ amount: 10000, user }),
     Payment.create({ amount: 10000, user: user2 }),
+    Payment.create({ amount: 10000, user: user2 }),
     Payment.create({ amount: 9999, user: user2, status: 'charged', chargedAt: db.fn.now() })
   ])
 }

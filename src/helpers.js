@@ -12,6 +12,7 @@ const mapSingleFromSnakeCase = (item, model) => {
   if (!_.isObject(item)) {
     return item
   }
+
   const plainKeys = Object.keys(item).filter(k => !k.includes('__'))
   const relationsKeys = Object.keys(item).filter(k => k.includes('__'))
 
@@ -27,49 +28,41 @@ const mapSingleFromSnakeCase = (item, model) => {
       return { ...acc, [cleanedKey]: item[key] }
     }, {})
 
-    console.log(model.relations[name])
-
     return { [name]: camelizeKeys(values) }
   }, {})
 
   return { ...camelizeKeys(_.pick(item, plainKeys)), ...relations }
 }
 
-const mapFromSnakeCase = (result, { model }) => {
+const mapper = (result, { model }) => {
   if (!Array.isArray(result)) {
     return mapSingleFromSnakeCase(result, model)
   } else {
-    return result.map(item => {
+    const camelCased = result.map(item => {
       return mapSingleFromSnakeCase(item, model)
     })
-  }
-}
 
-const mergeToOne = (result, { model }) => {
-  if (!Array.isArray(result)) {
-    return result
-  } else {
-    return result.reduce((acc, item) => {
-      const primaryKey = 'id'
-
-      // merge the same models and arraify its has many relations
-      if (acc.find(a => a[primaryKey] === item[primaryKey])) {
-        console.log(item)
+    const merged = camelCased.reduce((acc, item) => {
+      const existed = acc.find(a => a.id === item.id)
+      if (existed) {
+        model.relationNames.forEach(name => {
+          if (existed[name]) {
+            existed[name] = [].concat(existed[name], item[name])
+          }
+        })
+      } else {
+        acc.push(item)
       }
-
-      acc.push(item)
 
       return acc
     }, [])
+
+    return merged
   }
 }
 
-const mapToModel = (result, { model }) => {
-  return result
-}
-
 const processors = [
-  mapFromSnakeCase
+  mapper
   // mergeToOne,
   // mapToModel
 ]
