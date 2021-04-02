@@ -11,7 +11,8 @@
   },
   "scripts": {
     "examples:payments:print": "node examples/payments",
-    "examples:payments:repl": "DEBUG=knex:query,knex:bindings nodemon --experimental-repl-await examples/payments/repl.js",
+    "examples:payments:repl": "nodemon --experimental-repl-await examples/payments/repl.js",
+    "examples:payments:repl:debug": "DEBUG=knex:query,knex:bindings nodemon --experimental-repl-await examples/payments/repl.js",
     "test": ""
   },
   "repository": {

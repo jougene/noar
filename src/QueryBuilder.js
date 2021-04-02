@@ -21,7 +21,9 @@ class QueryBuilder {
   }
 
   find (id) {
-    return this.where({ id }).first()
+    const [found] = this.where({ id })
+
+    return found
   }
 
   with (...relationsNames) {
@@ -30,18 +32,13 @@ class QueryBuilder {
         throw new Error(`Unknown relation "${name}". Available relations for this model: [${this.model.relationNames.join(', ')}]`)
       }
 
-      let relation = this.model.relations[name]
-      const relationType = Object.keys(relation).filter(r => RELATIONS.includes(r))[0]
-      if (!relationType) {
-        throw new Error(`Unknown relation type for relation [${name}]`)
-      }
+      const { model: relation, type: relationType } = this.model.relations[name]
 
       if (relationType === 'hasOne') {
-        relation = relation[relationType]
         const foreignKey = `${relation.table}.${singularize(this.model.table)}_id`
         const selfKey = `${this.model.table}.id`
 
-        const foreignSelects = relation.metadata.columns.map(c => `${relation.table}.${c} as ${name}__${c}`)
+        const foreignSelects = relation.metadata.columns.map(c => `${relation.model.table}.${c} as ${name}__${c}`)
 
         // replace with actual columns, not *
         const selects = [`${this.model.table}.*`].concat(foreignSelects)
@@ -50,7 +47,6 @@ class QueryBuilder {
       }
 
       if (relationType === 'hasMany') {
-        relation = relation[relationType]
         const foreignKey = `${relation.table}.${singularize(this.model.table)}_id`
         const selfKey = `${this.model.table}.id`
         const foreignSelects = relation.metadata.columns.map(c => `${relation.table}.${c} as ${relation.table}__${c}`)
@@ -62,7 +58,6 @@ class QueryBuilder {
       }
 
       if (relationType === 'belongsTo') {
-        relation = relation[relationType]
         const foreignKey = `${singularize(relation.table)}_id`
         const foreignSelects = relation.metadata.columns.map(c => `${relation.table}.${c} as ${singularize(relation.table)}__${c}`)
         // replace with actual columns, not *
@@ -102,7 +97,7 @@ class QueryBuilder {
 
   // Make query builder thenable, so you can await it
   then (fn) {
-    return fn(this.qb)
+    return fn(this.qb.queryContext({ model: this.model }))
   }
 }
 

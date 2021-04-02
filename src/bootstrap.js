@@ -1,4 +1,4 @@
-const _ = require('lodash')
+// const _ = require('lodash')
 const knex = require('knex')
 const { postProcessResponse } = require('./helpers')
 const BaseModel = require('./Model')
@@ -33,6 +33,21 @@ const bootstrap = async (config) => {
 
     Object.entries(scopes).forEach(([key, fn]) => {
       model[key] = () => new QueryBuilder(model, fn(model.db(model.table)))
+    })
+
+    // relations (restructure relation key to object)
+    const { relations = {} } = model
+    const normalizedRelations = Object.entries(relations).reduce((acc, [key, rel]) => {
+      const type = Object.keys(rel)[0]
+      const normalizedRelation = { type, model: rel[type] }
+
+      return { ...acc, ...{ [key]: normalizedRelation } }
+    }, {})
+
+    Object.defineProperty(model, 'relations', {
+      get: function () {
+        return normalizedRelations
+      }
     })
   })
 }

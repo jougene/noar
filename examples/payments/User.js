@@ -13,6 +13,10 @@ class User extends Model {
   }
 
   static validations = {}
+
+  get fullname () {
+    return 'test'
+  }
 }
 
 module.exports = User

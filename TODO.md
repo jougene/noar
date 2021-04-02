@@ -1,0 +1,4 @@
+- save method on model instance
+- map result to Model class
+- merge multiple results for has many relation
+- add validation on save (ajv, joi - ???)
