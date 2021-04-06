@@ -9,6 +9,8 @@ const camelizeKeys = (obj) => {
 }
 
 const mapSingleFromSnakeCase = (item, model) => {
+  const Model = model
+
   if (!_.isObject(item)) {
     return item
   }
@@ -31,7 +33,7 @@ const mapSingleFromSnakeCase = (item, model) => {
     return { [name]: camelizeKeys(values) }
   }, {})
 
-  return { ...camelizeKeys(_.pick(item, plainKeys)), ...relations }
+  return new Model({ ...camelizeKeys(_.pick(item, plainKeys)), ...relations })
 }
 
 const mapper = (result, { model }) => {

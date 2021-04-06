@@ -7,20 +7,7 @@ class Mapper {
 
   mapRelations () {}
 
-  mapWhereArgs (args) {
-    const normalizedArgs = args.reduce((acc, arg) => {
-      if (_.isObject(arg)) {
-        return Object.entries(arg).reduce((acc, [k, v]) => {
-          acc[`${this.model.table}.${k}`] = v
-
-          return acc
-        }, {})
-      }
-      return args
-    }, [])
-
-    return normalizedArgs
-  }
+  mapWhereArgs (args) {}
 }
 
 module.exports = Mapper

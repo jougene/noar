@@ -13,7 +13,7 @@
     "examples:payments:print": "node examples/payments",
     "examples:payments:repl": "nodemon --experimental-repl-await examples/payments/repl.js",
     "examples:payments:repl:debug": "DEBUG=knex:query,knex:bindings nodemon --experimental-repl-await examples/payments/repl.js",
-    "test": ""
+    "test": "mocha test/**/*.test.js"
   },
   "repository": {
     "type": "git",
@@ -28,9 +28,6 @@
     "knex": "^0.95.4",
     "lodash": "^4.17.21"
   },
-  "nodemonConfig": {
-    "restartable": false
-  },
   "devDependencies": {
     "babel-eslint": "^10.1.0",
     "eslint": "^7.23.0",
@@ -41,5 +38,13 @@
     "mocha": "^8.3.2",
     "nodemon": "^2.0.7",
     "sqlite3": "^5.0.2"
+  },
+  "nodemonConfig": {
+    "restartable": false
+  },
+  "mocha": {
+    "colors": true,
+    "exit": true,
+    "file": ["./test/bootstrap.js"]
   }
 }

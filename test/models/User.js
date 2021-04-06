@@ -1,0 +1,22 @@
+const Model = require('../../src/Model')
+
+class User extends Model {
+  static table = 'users'
+
+  static scopes = {}
+
+  static get relations () {
+    return {
+      payments: { hasMany: require('./Payment') },
+      personal: { hasOne: require('./UserPersonal') }
+    }
+  }
+
+  static validations = {}
+
+  get fullname () {
+    return 'test'
+  }
+}
+
+module.exports = User

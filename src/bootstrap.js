@@ -1,4 +1,6 @@
-// const _ = require('lodash')
+const _ = require('lodash')
+const fs = require('fs').promises
+const path = require('path')
 const knex = require('knex')
 const { postProcessResponse } = require('./helpers')
 const BaseModel = require('./Model')
@@ -18,7 +20,19 @@ const connect = async (config) => {
 }
 
 const bootstrap = async (config) => {
-  const { models } = config
+  let { models } = config
+
+  if (_.isString(models)) {
+    const modelsDir = models
+    try {
+      const modelFiles = await fs.readdir(models)
+
+      // TODO cache ???
+      models = modelFiles.map(file => require(path.resolve(modelsDir, file)))
+    } catch (e) {
+      console.error(e)
+    }
+  }
 
   BaseModel.db = connection
 

@@ -1,3 +1,5 @@
+const errors = {}
+
 class NoarError extends Error {
   constructor (message) {
     super(message)
@@ -6,4 +8,21 @@ class NoarError extends Error {
   }
 }
 
-module.exports = NoarError
+errors.NotFoundError = class extends NoarError {
+  constructor (message, model, condition) {
+    super(message)
+
+    this.model = model
+    this.condition = condition
+  }
+}
+
+errors.ValidationError = class extends NoarError {
+  constructor (message, errors) {
+    super(message)
+
+    this.errors = errors
+  }
+}
+
+module.exports = { ...errors }

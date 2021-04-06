@@ -20,8 +20,8 @@ class QueryBuilder {
     return this
   }
 
-  find (id) {
-    const [found] = this.where({ id })
+  async find (id) {
+    const [found] = await this.where({ id })
 
     return found
   }

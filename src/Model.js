@@ -5,6 +5,17 @@ const QueryBuilder = require('./QueryBuilder')
 class Model {
   static db
 
+  constructor (props = {}) {
+    Object.entries(props).forEach(([name, value]) => {
+      if (this.constructor.hasRelation(name)) {
+        const RelationClass = this.constructor.relations[name].model
+        this[name] = new RelationClass(value)
+      } else {
+        this[name] = value
+      }
+    })
+  }
+
   static get qb () {
     return this.db(this.table)
   }
