@@ -9,7 +9,16 @@ class Model {
     Object.entries(props).forEach(([name, value]) => {
       if (this.constructor.hasRelation(name)) {
         const RelationClass = this.constructor.relations[name].model
-        this[name] = new RelationClass(value)
+        const relationType = this.constructor.relations[name].type
+
+        if (relationType === 'belongsTo') {
+          this[name] = new RelationClass(value)
+        }
+
+        if (relationType === 'hasMany') {
+          // check that value is array
+          this[name] = value.map(v => new RelationClass(v))
+        }
       } else {
         this[name] = value
       }

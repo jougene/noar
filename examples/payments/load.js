@@ -41,6 +41,13 @@ module.exports = async () => {
   const users = await Promise.all([
     User.create({ name: 'Eugene', email: 'test@email.com' }),
     User.create({ name: 'Vasya', email: 'vasya@email.com' })
+    // User.create({
+    // name: 'Vasya',
+    // email: 'vasya@email.com',
+    // payments: [
+    // { amount: 100 }
+    // ]
+    // })
   ])
 
   const [user, user2] = users

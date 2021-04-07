@@ -3,11 +3,10 @@ const { camelizeKeys } = require('./helpers')
 
 class Mapper {
   constructor (model) {
-    this.Model = model
+    this.model = model
   }
 
   mapDbResult (result) {
-    console.log(result)
     if (!Array.isArray(result)) {
       return this.mapOne(result)
     }
@@ -23,9 +22,9 @@ class Mapper {
     const merged = camelCased.reduce((acc, item) => {
       const existed = acc.find(a => a.id === item.id)
       if (existed) {
-        this.Model.relationNames.forEach(name => {
+        this.model.relationNames.forEach(name => {
           if (existed[name]) {
-            existed[name] = [].concat(existed[name], item[name])
+            existed[name] = existed[name].concat(item[name])
           }
         })
       } else {
@@ -58,10 +57,19 @@ class Mapper {
         return { ...acc, [cleanedKey]: item[key] }
       }, {})
 
-      return { [name]: camelizeKeys(values) }
+      const relationType = this.model.relations[name].type
+
+      const relationValues = {
+        hasMany: [camelizeKeys(values)],
+        belongsTo: camelizeKeys(values)
+      }[relationType]
+
+      return { ...acc, ...{ [name]: relationValues } }
     }, {})
 
-    return new this.Model({ ...camelizeKeys(_.pick(item, plainKeys)), ...relations })
+    const Model = this.model
+
+    return new Model({ ...camelizeKeys(_.pick(item, plainKeys)), ...relations })
   }
 }
 
