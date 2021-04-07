@@ -65,7 +65,7 @@ class Model {
     }, {})
 
     const [id] = await this.qb.insert(snakeCased)
-    const row = await this.qb.where({ id }).first()
+    const row = await new QueryBuilder(this, this.qb).find(id)
 
     Object.assign(entity, row)
 

@@ -1,14 +1,14 @@
 const path = require('path')
 const { connect, bootstrap } = require('../src/bootstrap')
 
-;
-(async () => {
+before(async () => {
   const db = await connect()
 
   await db.schema.createTable('users', t => {
     t.increments()
     t.string('name').notNullable()
     t.string('email')
+    t.string('status')
     t.string('camel_case')
 
     t.timestamp('created_at').notNullable().defaultTo(db.fn.now())
@@ -35,4 +35,4 @@ const { connect, bootstrap } = require('../src/bootstrap')
   })
 
   await bootstrap(({ models: path.resolve(__dirname, 'models') }))
-})()
+})

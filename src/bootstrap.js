@@ -2,9 +2,9 @@ const _ = require('lodash')
 const fs = require('fs').promises
 const path = require('path')
 const knex = require('knex')
-const { postProcessResponse } = require('./helpers')
 const BaseModel = require('./Model')
 const QueryBuilder = require('./QueryBuilder')
+const Mapper = require('./Mapper')
 
 let connection
 
@@ -13,7 +13,14 @@ const connect = async (config) => {
     client: 'sqlite',
     connection: ':memory:',
     useNullAsDefault: true,
-    postProcessResponse
+    postProcessResponse: (result, queryContext) => {
+      if (queryContext?.system || !queryContext?.model) {
+        return result
+      }
+
+      // return processors.reduce((result, processor) => processor(result, queryContext), result)
+      return new Mapper(queryContext.model).mapDbResult(result)
+    }
   })
 
   return connection
