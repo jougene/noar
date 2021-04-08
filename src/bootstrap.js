@@ -18,7 +18,6 @@ const connect = async (config) => {
         return result
       }
 
-      // return processors.reduce((result, processor) => processor(result, queryContext), result)
       return new Mapper(queryContext.model).mapDbResult(result)
     }
   })
@@ -43,8 +42,7 @@ const bootstrap = async (config) => {
 
   BaseModel.db = connection
 
-  models.forEach(async model => {
-    // metadata (to know what columns we have)
+  await Promise.all(models.map(async model => {
     model.metadata = {}
     const columnInfo = await connection(model.table).queryContext({ system: true }).columnInfo()
     model.metadata.columns = Object.keys(columnInfo)
@@ -70,7 +68,7 @@ const bootstrap = async (config) => {
         return normalizedRelations
       }
     })
-  })
+  }))
 }
 
 module.exports = { connect, bootstrap }

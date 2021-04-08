@@ -8,4 +8,12 @@ const camelizeKeys = (obj) => {
   }, {})
 }
 
-module.exports = { camelizeKeys }
+const snakeizeKeys = (obj) => {
+  return Object.entries(obj).reduce((acc, [k, v]) => {
+    acc[_.snakeCase(k)] = v
+
+    return acc
+  }, {})
+}
+
+module.exports = { camelizeKeys, snakeizeKeys }

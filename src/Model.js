@@ -1,12 +1,14 @@
 const _ = require('lodash')
 
 const QueryBuilder = require('./QueryBuilder')
+const { camelizeKeys, snakeizeKeys } = require('./helpers')
+const { entries, keys, values } = Object
 
 class Model {
   static db
 
   constructor (props = {}) {
-    Object.entries(props).forEach(([name, value]) => {
+    entries(props).forEach(([name, value]) => {
       if (this.constructor.hasRelation(name)) {
         const RelationClass = this.constructor.relations[name].model
         const relationType = this.constructor.relations[name].type
@@ -22,6 +24,10 @@ class Model {
       } else {
         this[name] = value
       }
+    })
+
+    entries(this.constructor.defaults || {}).forEach(([name, value]) => {
+      this[name] = value
     })
   }
 
@@ -47,38 +53,24 @@ class Model {
   }
 
   static async create (properties) {
-    const entity = new this()
-    const { relations, defaults } = this
+    const entity = new this(properties)
 
-    const keys = Object.keys(properties)
+    return entity.save()
+  }
 
-    const relationsNames = Object.keys(relations)
-    const plain = keys.filter(k => !relationsNames.includes(k))
-    const relationProps = keys.filter(k => relationsNames.includes(k))
+  /**
+   * Insert single row
+   */
+  static async insert (data) {
+    if (keys(data).some(k => !this.hasProperty(k))) {
+      // throw new Error(`Unknown property`)
+    }
 
-    const plainData = _.pick(properties, plain)
-    const relationsData = relationProps.reduce((acc, v) => {
-      // handle if relation does not have an ID
-      const relation = properties[v]
-      const key = `${v}_id` // or defined in relation
+    const rawData = { ...this.defaults, ...snakeizeKeys(data) }
 
-      return { ...acc, ...{ [key]: relation.id } }
-    }, {})
+    const [id] = await this.qb.insert(rawData)
 
-    const data = { ...defaults, ...plainData, ...relationsData }
-    const snakeCased = Object.keys(data).reduce((acc, key) => {
-      const snakeCasedKey = _.snakeCase(key)
-      acc[snakeCasedKey] = data[key]
-
-      return acc
-    }, {})
-
-    const [id] = await this.qb.insert(snakeCased)
-    const row = await new QueryBuilder(this, this.qb).find(id)
-
-    Object.assign(entity, row)
-
-    return entity
+    return new QueryBuilder(this, this.qb).find(id)
   }
 
   static with (...relationsNames) {
@@ -86,15 +78,60 @@ class Model {
   }
 
   static get relationNames () {
-    return Object.keys(this.relations || {})
+    return keys(this.relations || {})
+  }
+
+  static get properties () {
+    return this.metadata.columns.map(_.camelCase)
   }
 
   static hasRelation (name) {
     return this.relationNames.includes(name)
   }
 
+  static hasProperty (name) {
+    return this.properties.includes(name)
+  }
+
   async reload () {}
-  async save () {}
+
+  async save () {
+    // check if related object is present in database
+    // save main entity
+    // save related objects
+    // careful about depth
+    return this
+
+    // const keys = Object.keys(this)
+
+    // const relationsNames = this.constructor.relationsNames
+    // const plain = keys.filter(k => !relationsNames.includes(k))
+    // const relationProps = keys.filter(k => relationsNames.includes(k))
+
+    // const plainData = _.pick(this, plain)
+    // const relationsData = relationProps.reduce((acc, v) => {
+    // // handle if relation does not have an ID
+    // const relation = this[v]
+    // const key = `${v}_id` // or defined in relation
+
+    // return { ...acc, ...{ [key]: relation.id } }
+    // }, {})
+
+    // const data = { ...defaults, ...plainData, ...relationsData }
+    // const snakeCased = Object.keys(data).reduce((acc, key) => {
+    // const snakeCasedKey = _.snakeCase(key)
+    // acc[snakeCasedKey] = data[key]
+
+    // return acc
+    // }, {})
+
+    // const [id] = await this.qb.insert(snakeCased)
+    // const row = await new QueryBuilder(this, this.qb).find(id)
+
+    // Object.assign(entity, row)
+
+    // return entity
+  }
 }
 
 module.exports = Model

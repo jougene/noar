@@ -7,7 +7,7 @@ describe('QueryBuilder', () => {
     it('has many', async () => {
       const userWithPayments = await User.with('payments').first()
 
-      console.log(userWithPayments)
+      // console.log(userWithPayments)
     })
   })
 })

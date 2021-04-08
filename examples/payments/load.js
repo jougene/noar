@@ -32,30 +32,24 @@ module.exports = async () => {
     t.timestamp('charged_at')
     t.timestamp('created_at').notNullable().defaultTo(db.fn.now())
 
-    t.integer('user_id').notNullable()
+    t.integer('user_id')
     t.foreign('user_id').references('id').inTable('users')
   })
 
   await bootstrap(({ models: [User, UserPersonal, Payment] }))
 
   const users = await Promise.all([
-    User.create({ name: 'Eugene', email: 'test@email.com' }),
-    User.create({ name: 'Vasya', email: 'vasya@email.com' })
-    // User.create({
-    // name: 'Vasya',
-    // email: 'vasya@email.com',
-    // payments: [
-    // { amount: 100 }
-    // ]
-    // })
+    User.insert({ name: 'Eugene', email: 'test@email.com', unkonow: 1412 }),
+    User.insert({ name: 'Vasya', email: 'vasya@email.com' })
   ])
 
   const [user, user2] = users
 
   await Promise.all([
-    Payment.create({ amount: 10000, user }),
-    Payment.create({ amount: 10000, user: user2 }),
-    Payment.create({ amount: 10000, user: user2 }),
-    Payment.create({ amount: 9999, user: user2, status: 'charged', chargedAt: db.fn.now() })
+    Payment.insert({ amount: 10000, userId: user.id }),
+    Payment.insert({ amount: 10000, userId: user2.id }),
+    Payment.insert({ amount: 10000 })
+    // Payment.create({ amount: 10000, user: user2 }),
+    // Payment.create({ amount: 9999, user: user2, status: 'charged', chargedAt: db.fn.now() })
   ])
 }

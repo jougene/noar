@@ -71,6 +71,13 @@ class Mapper {
 
     return new Model({ ...camelizeKeys(_.pick(item, plainKeys)), ...relations })
   }
+
+  /**
+   * Prepare Model object to be ready for insert in database
+   */
+  prepareForInsert (object) {
+
+  }
 }
 
 module.exports = Mapper
