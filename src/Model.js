@@ -1,13 +1,18 @@
 const _ = require('lodash')
+const { singularize } = require('inflected')
 
 const QueryBuilder = require('./QueryBuilder')
-const { camelizeKeys, snakeizeKeys } = require('./helpers')
-const { entries, keys, values } = Object
+const { assert, snakeizeKeys } = require('./helpers')
+const { entries, keys } = Object
 
 class Model {
   static db
 
   constructor (props = {}) {
+    entries(this.constructor.defaults || {}).forEach(([name, value]) => {
+      this[name] = value
+    })
+
     entries(props).forEach(([name, value]) => {
       if (this.constructor.hasRelation(name)) {
         const RelationClass = this.constructor.relations[name].model
@@ -24,10 +29,6 @@ class Model {
       } else {
         this[name] = value
       }
-    })
-
-    entries(this.constructor.defaults || {}).forEach(([name, value]) => {
-      this[name] = value
     })
   }
 
@@ -52,25 +53,31 @@ class Model {
     return new QueryBuilder(this, this.qb).where(...args)
   }
 
-  static async create (properties) {
-    const entity = new this(properties)
-
-    return entity.save()
-  }
-
   /**
-   * Insert single row
+   * Insert single row with only own properties.
    */
   static async insert (data) {
-    if (keys(data).some(k => !this.hasProperty(k))) {
-      // throw new Error(`Unknown property`)
-    }
+    keys(data).forEach(key => {
+      assert(!this.hasRelation(key), `Trying to insert relation [${key}]. Use ".create" function for this purpose`)
+      assert(this.hasProperty(key), `
+        Unknown property [${key}].
+        Available properties: [${this.properties.join(' ')}]`)
+    })
 
     const rawData = { ...this.defaults, ...snakeizeKeys(data) }
 
     const [id] = await this.qb.insert(rawData)
 
     return new QueryBuilder(this, this.qb).find(id)
+  }
+
+  /**
+   * Create model with related objects if need
+   */
+  static async create (properties) {
+    const entity = new this(properties)
+
+    return entity.save()
   }
 
   static with (...relationsNames) {
@@ -96,41 +103,39 @@ class Model {
   async reload () {}
 
   async save () {
-    // check if related object is present in database
-    // save main entity
-    // save related objects
-    // careful about depth
-    return this
+    // TODO can be update, not insert
+    const ctor = this.constructor
 
-    // const keys = Object.keys(this)
+    const ownProperyKeys = keys(this).filter(k => ctor.hasProperty(k))
+    const properties = _.pick(this, ownProperyKeys)
+    let instance
+    if (this.id) {
+      // check if nothing changes
+      // await ctor.update(id, properties.filter(p => p))
+    } else {
+      instance = await ctor.insert(properties)
+    }
 
-    // const relationsNames = this.constructor.relationsNames
-    // const plain = keys.filter(k => !relationsNames.includes(k))
-    // const relationProps = keys.filter(k => relationsNames.includes(k))
+    const relationKeys = keys(this).filter(k => ctor.hasRelation(k))
 
-    // const plainData = _.pick(this, plain)
-    // const relationsData = relationProps.reduce((acc, v) => {
-    // // handle if relation does not have an ID
-    // const relation = this[v]
-    // const key = `${v}_id` // or defined in relation
+    for (const key of relationKeys) {
+      const relationType = ctor.relations[key].type
 
-    // return { ...acc, ...{ [key]: relation.id } }
-    // }, {})
+      if (relationType === 'hasMany') {
+        // TODO replace hardcoded foreignKeys to some more ....
+        const foreignKey = `${singularize(ctor.table)}Id`
 
-    // const data = { ...defaults, ...plainData, ...relationsData }
-    // const snakeCased = Object.keys(data).reduce((acc, key) => {
-    // const snakeCasedKey = _.snakeCase(key)
-    // acc[snakeCasedKey] = data[key]
+        assert(Array.isArray(this[key]), `Property ${key} must be an array, because hasMany relation`)
 
-    // return acc
-    // }, {})
+        this[key].forEach((item, idx) => {
+          item[foreignKey] = instance.id
+          this[key][idx] = item.save()
+        })
+        instance[key] = await Promise.all(this[key])
+      }
+    }
 
-    // const [id] = await this.qb.insert(snakeCased)
-    // const row = await new QueryBuilder(this, this.qb).find(id)
-
-    // Object.assign(entity, row)
-
-    // return entity
+    return instance
   }
 }
 

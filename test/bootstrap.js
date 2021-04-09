@@ -35,4 +35,6 @@ before(async () => {
   })
 
   await bootstrap(({ models: path.resolve(__dirname, 'models') }))
+
+  // load fixtures
 })

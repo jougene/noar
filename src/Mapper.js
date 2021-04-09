@@ -42,6 +42,8 @@ class Mapper {
       return item
     }
 
+    console.log(item)
+
     const plainKeys = Object.keys(item).filter(k => !k.includes('__'))
     const relationsKeys = Object.keys(item).filter(k => k.includes('__'))
 

@@ -1,3 +1,4 @@
+const assert = require('assert')
 const _ = require('lodash')
 
 const camelizeKeys = (obj) => {
@@ -16,4 +17,14 @@ const snakeizeKeys = (obj) => {
   }, {})
 }
 
-module.exports = { camelizeKeys, snakeizeKeys }
+assert.instanceOf = (actual, klass) => {
+  assert.equal(actual.constructor.name, klass.name, `
+    ${actual} is not instance of ${klass}
+  `)
+}
+
+assert.count = (array, count) => {
+  assert.equal(array.length, count)
+}
+
+module.exports = { assert, camelizeKeys, snakeizeKeys }

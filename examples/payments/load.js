@@ -11,6 +11,7 @@ module.exports = async () => {
     t.increments()
     t.string('name').notNullable()
     t.string('email')
+    t.string('status')
     t.string('camel_case')
 
     t.timestamp('created_at').notNullable().defaultTo(db.fn.now())
@@ -39,7 +40,7 @@ module.exports = async () => {
   await bootstrap(({ models: [User, UserPersonal, Payment] }))
 
   const users = await Promise.all([
-    User.insert({ name: 'Eugene', email: 'test@email.com', unkonow: 1412 }),
+    User.insert({ name: 'Eugene', email: 'test@email.com' }),
     User.insert({ name: 'Vasya', email: 'vasya@email.com' })
   ])
 
@@ -48,8 +49,13 @@ module.exports = async () => {
   await Promise.all([
     Payment.insert({ amount: 10000, userId: user.id }),
     Payment.insert({ amount: 10000, userId: user2.id }),
-    Payment.insert({ amount: 10000 })
-    // Payment.create({ amount: 10000, user: user2 }),
-    // Payment.create({ amount: 9999, user: user2, status: 'charged', chargedAt: db.fn.now() })
+    Payment.insert({ amount: 10000 }),
+    Payment.insert({ amount: 10000, userId: user2.id }),
+    Payment.insert({
+      amount: 9999,
+      userId: user2.id,
+      status: 'charged',
+      chargedAt: db.fn.now()
+    })
   ])
 }
