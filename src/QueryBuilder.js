@@ -78,7 +78,7 @@ class QueryBuilder {
         return Object.entries(arg).reduce((acc, [k, v]) => {
           if (this.model.hasRelation(pluralize(k))) {
             const relation = this.model.relations[pluralize(k)]
-            console.log(relation)
+            // console.log(relation)
           } else {
             acc[`${this.model.table}.${k}`] = v
           }

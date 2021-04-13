@@ -107,35 +107,39 @@ class Model {
     const ctor = this.constructor
 
     const ownProperyKeys = keys(this).filter(k => ctor.hasProperty(k))
-    const properties = _.pick(this, ownProperyKeys)
-    let instance
-    if (this.id) {
-      // check if nothing changes
-      // await ctor.update(id, properties.filter(p => p))
-    } else {
-      instance = await ctor.insert(properties)
-    }
-
     const relationKeys = keys(this).filter(k => ctor.hasRelation(k))
+    const relations = relationKeys.map(k => ( { name: k, ...ctor.relations[k] } ))
 
-    for (const key of relationKeys) {
-      const relationType = ctor.relations[key].type
+    const relationsByType = _.groupBy(relations, ({ type }) => type)
 
-      if (relationType === 'hasMany') {
-        // TODO replace hardcoded foreignKeys to some more ....
-        const foreignKey = `${singularize(ctor.table)}Id`
+    // Handle belongsTo relations
+    const foreignProperties = relationsByType.belongsTo?.reduce((acc, relation ) => {
+      const key = `${singularize(relation.model.table)}Id`
+      const value = this[relation.name].id
 
-        assert(Array.isArray(this[key]), `Property ${key} must be an array, because hasMany relation`)
+      return {...acc, ...{ [key]: value }}
+    }, {})
 
-        this[key].forEach((item, idx) => {
-          item[foreignKey] = instance.id
-          this[key][idx] = item.save()
-        })
-        instance[key] = await Promise.all(this[key])
-      }
+    const ownProperties = _.pick(this, ownProperyKeys)
+    const properties = { ...ownProperties, ...foreignProperties }
+    const instance = await ctor.insert(properties)
+
+    Object.assign(this, { id: instance.id, ...properties })
+
+    // Handle hasMany relations
+    for (const relation of relationsByType.hasMany || []) {
+      const foreignKey = `${singularize(ctor.table)}Id`
+
+      assert(Array.isArray(this[relation.name]), `Property ${relation.name} must be an array, because hasMany relation`)
+
+      this[relation.name].forEach((item, idx) => {
+        item[foreignKey] = instance.id
+        this[relation.name][idx] = item.save()
+      })
+      this[relation.name] = await Promise.all(this[relation.name])
     }
 
-    return instance
+    return this
   }
 }
 

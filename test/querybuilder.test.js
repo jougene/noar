@@ -5,7 +5,7 @@ const Payment = require('./models/Payment')
 describe('QueryBuilder', () => {
   describe('with', () => {
     it('has many', async () => {
-      await User.create({
+      const { id } = await User.create({
         name: 'Test',
         email: 'test2@test.com',
         payments: [
@@ -14,11 +14,9 @@ describe('QueryBuilder', () => {
         ]
       })
 
-      const user = await User.with('payments').first()
-      console.log(user.payments)
+      const user = await User.with('payments').find(id)
 
       assert.ok(user)
-      // console.log(user.payments)
       assert.count(user.payments, 2)
     })
   })

@@ -47,7 +47,15 @@ describe('Model', () => {
     })
 
     it('create model with belongsTo related object', async () => {
+      const user = await User.create({ name: 'Test', email: 'test2@test.com' })
 
+      const payment = await Payment.create({ amount: 101, user })
+
+      assert.ok(payment)
+      assert.ok(payment.id)
+
+      assert.ok(payment.user)
+      assert.equal(payment.user.id, user.id)
     })
 
     it('create model with hasMany related objects', async () => {
