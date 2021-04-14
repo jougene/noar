@@ -33,7 +33,6 @@ const bootstrap = async (config) => {
     try {
       const modelFiles = await fs.readdir(models)
 
-      // TODO cache ???
       models = modelFiles.map(file => require(path.resolve(modelsDir, file)))
     } catch (e) {
       console.error(e)
@@ -51,7 +50,7 @@ const bootstrap = async (config) => {
     const { scopes = {} } = model
 
     Object.entries(scopes).forEach(([key, fn]) => {
-      model[key] = () => new QueryBuilder(model, fn(model.db(model.table)))
+      model[key] = () => fn(new QueryBuilder(model, model.qb))
     })
 
     // relations (restructure relation key to object)

@@ -71,6 +71,12 @@ class Model {
     return new QueryBuilder(this, this.qb).find(id)
   }
 
+  static async update (where, data) {
+    const id = await this.qb.where(where).update(snakeizeKeys(data))
+
+    return new QueryBuilder(this, this.qb).find(id)
+  }
+
   /**
    * Create model with related objects if need
    */
@@ -112,6 +118,8 @@ class Model {
 
     const relationsByType = _.groupBy(relations, ({ type }) => type)
 
+    // TODO add handling hasOne relations
+
     // Handle belongsTo relations
     const foreignProperties = relationsByType.belongsTo?.reduce((acc, relation ) => {
       const key = `${singularize(relation.model.table)}Id`
@@ -122,9 +130,17 @@ class Model {
 
     const ownProperties = _.pick(this, ownProperyKeys)
     const properties = { ...ownProperties, ...foreignProperties }
-    const instance = await ctor.insert(properties)
+    let instance
+    if (this.id) {
+      // TODO check if we need update (Diff objects)
+      // update only changed fields - ??? How can do this?
+      // for now it is not necessary
+      instance = await ctor.update({ id: this.id }, ownProperties)
+    } else {
+      instance = await ctor.insert(properties)
+    }
 
-    Object.assign(this, { id: instance.id, ...properties })
+    Object.assign(this, { ...instance, ...properties })
 
     // Handle hasMany relations
     for (const relation of relationsByType.hasMany || []) {

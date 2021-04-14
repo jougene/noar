@@ -34,6 +34,26 @@ describe('Model', () => {
     })
   })
 
+  describe('save', () => {
+    it('new', async () => {
+      const user = new User({ name: 'Test', email: 'test@email.com' })
+
+      await user.save()
+
+      assert.ok(user.id)
+    })
+
+    it('update', async () => {
+      const user = await new User({ name: 'Test', email: 'test@email.com' }).save()
+
+      user.status = 'newstatus'
+
+      await user.save()
+
+      assert.equal(user.status, 'newstatus')
+    })
+  })
+
   describe('create', () => {
     it('create simple model', async () => {
       const user = await User.create({ name: 'Test', email: 'test@test.com' })

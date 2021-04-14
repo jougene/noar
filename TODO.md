@@ -1,2 +1,5 @@
+- update model
+- transactions
+- handle hasOne relation
+-
 - add validation on save (ajv, joi - ???)
-- save method on model instance

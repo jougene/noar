@@ -1,8 +1,6 @@
 const _ = require('lodash')
 const { singularize, pluralize } = require('inflected')
 
-const RELATIONS = ['belongsTo', 'hasMany', 'hasOne']
-
 class QueryBuilder {
   constructor (model, qb) {
     this.model = model
@@ -10,7 +8,7 @@ class QueryBuilder {
 
     // Add all scopes back to query builder for chaining works!
     Object.entries(model.scopes || {}).forEach(([key, fn]) => {
-      this[key] = () => new QueryBuilder(model, fn(this.qb))
+      this[key] = () => fn(new QueryBuilder(model, this.qb))
     })
   }
 
@@ -76,9 +74,10 @@ class QueryBuilder {
     const normalizedArgs = args.reduce((acc, arg) => {
       if (_.isObject(arg)) {
         return Object.entries(arg).reduce((acc, [k, v]) => {
-          if (this.model.hasRelation(pluralize(k))) {
-            const relation = this.model.relations[pluralize(k)]
-            // console.log(relation)
+          // TODO handle find by relation
+          if (this.model.hasRelation(k)) {
+            const relation = this.model.relations[k]
+            acc[`${relation.model.table}.id`] = v.id
           } else {
             acc[`${this.model.table}.${k}`] = v
           }
