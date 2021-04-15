@@ -3,7 +3,7 @@ const { singularize } = require('inflected')
 
 const QueryBuilder = require('./QueryBuilder')
 const { assert, snakeizeKeys } = require('./helpers')
-const { entries, keys } = Object
+const { entries, keys, assign } = Object
 
 class Model {
   static db
@@ -154,6 +154,19 @@ class Model {
       })
       this[relation.name] = await Promise.all(this[relation.name])
     }
+
+    return this
+  }
+
+  async update (properties) {
+    const ctor = this.constructor
+
+    const ownProperyKeys = keys(this).filter(k => ctor.hasProperty(k))
+    properties = _.pick(properties, ownProperyKeys)
+
+    const updated = await ctor.update({ id: this.id }, properties)
+
+    assign(this, updated)
 
     return this
   }

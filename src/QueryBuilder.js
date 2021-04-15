@@ -1,5 +1,5 @@
 const _ = require('lodash')
-const { singularize, pluralize } = require('inflected')
+const { singularize } = require('inflected')
 
 class QueryBuilder {
   constructor (model, qb) {

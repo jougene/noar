@@ -47,11 +47,11 @@ module.exports = async () => {
   const [user, user2] = users
 
   await Promise.all([
-    Payment.insert({ amount: 10000, userId: user.id }),
-    Payment.insert({ amount: 10000, userId: user2.id }),
-    Payment.insert({ amount: 10000 }),
-    Payment.insert({ amount: 10000, userId: user2.id }),
-    Payment.insert({
+    Payment.create({ amount: 10000, userId: user.id }),
+    Payment.create({ amount: 10000, userId: user2.id }),
+    Payment.create({ amount: 10000 }),
+    Payment.create({ amount: 10000, userId: user2.id }),
+    Payment.create({
       amount: 9999,
       userId: user2.id,
       status: 'charged',

@@ -1,5 +1,5 @@
-- update model
+- docs
+- querybuilder first issue with hasMany relations
 - transactions
 - handle hasOne relation
--
 - add validation on save (ajv, joi - ???)
