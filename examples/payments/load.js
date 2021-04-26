@@ -5,7 +5,12 @@ const Payment = require('./Payment')
 const { connect, bootstrap } = require('../../src/bootstrap')
 
 module.exports = async () => {
-  const db = await connect()
+  const config = {
+    client: 'sqlite',
+    connection: ':memory:'
+  }
+
+  const db = await connect(config)
 
   await db.schema.createTable('users', t => {
     t.increments()

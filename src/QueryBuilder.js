@@ -30,38 +30,40 @@ class QueryBuilder {
         throw new Error(`Unknown relation "${name}". Available relations for this model: [${this.model.relationNames.join(', ')}]`)
       }
 
-      const { model: relation, type: relationType } = this.model.relations[name]
+      const relation = this.model.relations[name]
 
-      if (relationType === 'hasOne') {
-        const foreignKey = `${relation.table}.${singularize(this.model.table)}_id`
+      if (relation.type === 'hasOne') {
+        let foreignKey = relation.join || `${singularize(this.model.table)}_id`
+        foreignKey = `${relation.model.table}.${foreignKey}`
+
         const selfKey = `${this.model.table}.id`
 
-        const foreignSelects = relation.metadata.columns.map(c => `${relation.model.table}.${c} as ${name}__${c}`)
+        const foreignSelects = relation.model.metadata.columns.map(c => `${relation.model.table}.${c} as ${relation.model.table}__${c}`)
 
         // replace with actual columns, not *
         const selects = [`${this.model.table}.*`].concat(foreignSelects)
 
-        return qb.leftJoin(relation.table, selfKey, foreignKey).select(selects)
+        return qb.leftJoin(relation.model.table, selfKey, foreignKey).select(selects)
       }
 
-      if (relationType === 'hasMany') {
-        const foreignKey = `${relation.table}.${singularize(this.model.table)}_id`
+      if (relation.type === 'hasMany') {
+        const foreignKey = `${relation.model.table}.${singularize(this.model.table)}_id`
         const selfKey = `${this.model.table}.id`
-        const foreignSelects = relation.metadata.columns.map(c => `${relation.table}.${c} as ${relation.table}__${c}`)
+        const foreignSelects = relation.model.metadata.columns.map(c => `${relation.model.table}.${c} as ${relation.model.table}__${c}`)
 
         // replace with actual columns, not *
         const selects = [`${this.model.table}.*`].concat(foreignSelects)
 
-        return qb.leftJoin(relation.table, selfKey, foreignKey).select(selects)
+        return qb.leftJoin(relation.model.table, selfKey, foreignKey).select(selects)
       }
 
-      if (relationType === 'belongsTo') {
-        const foreignKey = `${singularize(relation.table)}_id`
-        const foreignSelects = relation.metadata.columns.map(c => `${relation.table}.${c} as ${singularize(relation.table)}__${c}`)
+      if (relation.type === 'belongsTo') {
+        const foreignKey = relation.join || `${singularize(relation.model.table)}_id`
+        const foreignSelects = relation.model.metadata.columns.map(c => `${relation.model.table}.${c} as ${singularize(relation.model.table)}__${c}`)
         // replace with actual columns, not *
         const selects = [`${this.model.table}.*`].concat(foreignSelects)
 
-        return qb.join(relation.table, `${this.model.table}.${foreignKey}`, `${relation.table}.id`).select(selects)
+        return qb.join(relation.model.table, `${this.model.table}.${foreignKey}`, `${relation.model.table}.id`).select(selects)
       }
 
       return qb

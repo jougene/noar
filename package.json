@@ -5,7 +5,7 @@
   "keywords": [],
   "description": "NodeJS ActiveRecord",
   "homepage": "https://github.com/jougene/noar#readme",
-  "main": "index.js",
+  "main": "src/index.js",
   "directories": {
     "test": "test"
   },
@@ -25,6 +25,7 @@
   },
   "dependencies": {
     "inflected": "^2.1.0",
+    "joi": "^17.4.0",
     "knex": "^0.95.4",
     "lodash": "^4.17.21"
   },
@@ -37,6 +38,7 @@
     "eslint-plugin-promise": "^4.3.1",
     "mocha": "^8.3.2",
     "nodemon": "^2.0.7",
+    "pg": "^8.6.0",
     "sqlite3": "^5.0.2"
   },
   "nodemonConfig": {
@@ -45,6 +47,8 @@
   "mocha": {
     "colors": true,
     "exit": true,
-    "file": ["./test/bootstrap.js"]
+    "file": [
+      "./test/bootstrap.js"
+    ]
   }
 }

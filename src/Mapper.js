@@ -1,5 +1,6 @@
 const _ = require('lodash')
 const { camelizeKeys } = require('./helpers')
+const { pluralize } = require('inflected')
 
 class Mapper {
   constructor (model) {
@@ -57,14 +58,16 @@ class Mapper {
         return { ...acc, [cleanedKey]: item[key] }
       }, {})
 
-      const relationType = this.model.relations[name].type
+      const relation = Object.values(this.model.relations).find(r => r.model.table === pluralize(name))
+      const relationType = relation.type
 
       const relationValues = {
+        hasOne: camelizeKeys(values),
         hasMany: [camelizeKeys(values)],
         belongsTo: camelizeKeys(values)
       }[relationType]
 
-      return { ...acc, ...{ [name]: relationValues } }
+      return { ...acc, ...{ [relation.name]: relationValues } }
     }, {})
 
     const Model = this.model

@@ -1,5 +1,6 @@
 const _ = require('lodash')
 const { singularize } = require('inflected')
+const joi = require('joi')
 
 const QueryBuilder = require('./QueryBuilder')
 const { assert, snakeizeKeys } = require('./helpers')
@@ -17,6 +18,10 @@ class Model {
       if (this.constructor.hasRelation(name)) {
         const RelationClass = this.constructor.relations[name].model
         const relationType = this.constructor.relations[name].type
+
+        if (relationType === 'hasOne') {
+          this[name] = new RelationClass(value)
+        }
 
         if (relationType === 'belongsTo') {
           this[name] = new RelationClass(value)
@@ -37,7 +42,7 @@ class Model {
   }
 
   static all () {
-    return this.qb
+    return new QueryBuilder(this, this.qb)
   }
 
   static first () {
@@ -109,6 +114,8 @@ class Model {
   async reload () {}
 
   async save () {
+    this.validate()
+
     // TODO can be update, not insert
     const ctor = this.constructor
 
@@ -164,11 +171,27 @@ class Model {
     const ownProperyKeys = keys(this).filter(k => ctor.hasProperty(k))
     properties = _.pick(properties, ownProperyKeys)
 
+    assign(this, properties)
+
+    this.validate()
+
     const updated = await ctor.update({ id: this.id }, properties)
 
     assign(this, updated)
 
     return this
+  }
+
+  validate() {
+    if (!this.constructor.validations) {
+      return
+    }
+
+    const schema = joi.object(this.constructor.validations())
+
+    const { error } = schema.validate(this)
+
+    if (error) throw error
   }
 }
 

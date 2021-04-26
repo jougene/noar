@@ -9,9 +9,7 @@ const Mapper = require('./Mapper')
 let connection
 
 const connect = async (config) => {
-  connection = knex({
-    client: 'sqlite',
-    connection: ':memory:',
+  config = _.merge(config, {
     useNullAsDefault: true,
     postProcessResponse: (result, queryContext) => {
       if (queryContext?.system || !queryContext?.model) {
@@ -20,13 +18,20 @@ const connect = async (config) => {
 
       return new Mapper(queryContext.model).mapDbResult(result)
     }
+
   })
+
+  connection = knex(config)
 
   return connection
 }
 
 const bootstrap = async (config) => {
-  let { models } = config
+  if (!connection) {
+    await connect(config)
+  }
+
+  let models = config.models
 
   if (_.isString(models)) {
     const modelsDir = models
@@ -57,7 +62,7 @@ const bootstrap = async (config) => {
     const { relations = {} } = model
     const normalizedRelations = Object.entries(relations).reduce((acc, [key, rel]) => {
       const type = Object.keys(rel)[0]
-      const normalizedRelation = { type, model: rel[type] }
+      const normalizedRelation = { type, name: key, model: rel[type], join: rel.join }
 
       return { ...acc, ...{ [key]: normalizedRelation } }
     }, {})
@@ -68,6 +73,8 @@ const bootstrap = async (config) => {
       }
     })
   }))
+
+  return { models }
 }
 
 module.exports = { connect, bootstrap }
