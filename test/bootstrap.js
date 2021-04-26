@@ -2,7 +2,12 @@ const path = require('path')
 const { connect, bootstrap } = require('../src/bootstrap')
 
 before(async () => {
-  const db = await connect()
+  const config = {
+    client: 'sqlite',
+    connection: ':memory:'
+  }
+
+  const db = await connect(config)
 
   await db.schema.createTable('users', t => {
     t.increments()

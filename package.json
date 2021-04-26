@@ -2,7 +2,7 @@
   "name": "@jougene/noar",
   "version": "0.0.1",
   "author": "Eugene Sinitsyn",
-  "keywords": [],
+  "keywords": ["knex", "activerecord", "orm", "rails"],
   "description": "NodeJS ActiveRecord",
   "homepage": "https://github.com/jougene/noar#readme",
   "main": "src/index.js",
@@ -10,6 +10,7 @@
     "test": "test"
   },
   "scripts": {
+    "lint": "eslint \"{src,examples,test}/**/*.js\"",
     "examples:payments:print": "node examples/payments",
     "examples:payments:repl": "nodemon --experimental-repl-await examples/payments/repl.js",
     "examples:payments:repl:debug": "DEBUG=knex:query,knex:bindings nodemon --experimental-repl-await examples/payments/repl.js",
@@ -30,10 +31,11 @@
     "lodash": "^4.17.21"
   },
   "devDependencies": {
-    "babel-eslint": "^10.1.0",
+    "@babel/eslint-parser": "^7.13.14",
+    "@babel/plugin-proposal-class-properties": "^7.13.0",
     "eslint": "^7.23.0",
     "eslint-config-standard": "^16.0.2",
-    "eslint-plugin-mocha": "^8.1.0",
+    "eslint-plugin-import": "^2.22.1",
     "eslint-plugin-node": "^11.1.0",
     "eslint-plugin-promise": "^4.3.1",
     "mocha": "^8.3.2",

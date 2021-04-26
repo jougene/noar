@@ -1,6 +1,12 @@
 # NoAR
 NodeJS ActiveRecord
 
+[![build](https://travis-ci.com/jougene/noar.svg?branch=main)](https://travis-ci.com/github/jougene/noar)
+[![js-standard-style](https://img.shields.io/badge/code%20style-standard-brightgreen.svg)](http://standardjs.com)
+
+## Demo
+TBD asciinema
+
 ## Features
 - Elegant api (Inspired by Rails ActiveRecord and Laravel Eloquent)
 - Uses convention over configuration

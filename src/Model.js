@@ -77,9 +77,10 @@ class Model {
   }
 
   static async update (where, data) {
-    const id = await this.qb.where(where).update(snakeizeKeys(data))
+    await this.qb.where(where).update(snakeizeKeys(data))
 
-    return new QueryBuilder(this, this.qb).find(id)
+    // TODO fix where.id
+    return new QueryBuilder(this, this.qb).find(where.id)
   }
 
   /**
@@ -121,18 +122,18 @@ class Model {
 
     const ownProperyKeys = keys(this).filter(k => ctor.hasProperty(k))
     const relationKeys = keys(this).filter(k => ctor.hasRelation(k))
-    const relations = relationKeys.map(k => ( { name: k, ...ctor.relations[k] } ))
+    const relations = relationKeys.map(k => ({ name: k, ...ctor.relations[k] }))
 
     const relationsByType = _.groupBy(relations, ({ type }) => type)
 
     // TODO add handling hasOne relations
 
     // Handle belongsTo relations
-    const foreignProperties = relationsByType.belongsTo?.reduce((acc, relation ) => {
+    const foreignProperties = relationsByType.belongsTo?.reduce((acc, relation) => {
       const key = `${singularize(relation.model.table)}Id`
       const value = this[relation.name].id
 
-      return {...acc, ...{ [key]: value }}
+      return { ...acc, ...{ [key]: value } }
     }, {})
 
     const ownProperties = _.pick(this, ownProperyKeys)
@@ -182,7 +183,7 @@ class Model {
     return this
   }
 
-  validate() {
+  validate () {
     if (!this.constructor.validations) {
       return
     }
@@ -191,7 +192,9 @@ class Model {
 
     const { error } = schema.validate(this)
 
-    if (error) throw error
+    if (error) {
+      throw error
+    }
   }
 }
 
