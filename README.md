@@ -1,5 +1,8 @@
-# NoAR
-NodeJS ActiveRecord
+<div align="center">
+  <img width="500" src="https://user-images.githubusercontent.com/13833179/120039872-46830980-c00e-11eb-9f2d-0949276cf6d1.jpg" alt="John Doe">
+</div>
+
+# NodeJS ActiveRecord
 
 [![build](https://travis-ci.com/jougene/noar.svg?branch=main)](https://travis-ci.com/github/jougene/noar)
 [![js-standard-style](https://img.shields.io/badge/code%20style-standard-brightgreen.svg)](http://standardjs.com)
