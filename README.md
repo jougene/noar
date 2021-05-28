@@ -159,3 +159,10 @@ await Transaction.start()
 
 ... code
 ```
+
+## Enhancements
+TBD
+Add all models to your custom repl
+```javascript
+Noar.augmentRepl(repl.Context)
+```
