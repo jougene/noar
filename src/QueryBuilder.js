@@ -13,7 +13,13 @@ class QueryBuilder {
   }
 
   first () {
-    this.qb = this.qb.first()
+    const table = this.model.table
+
+    this.qb = this.qb.where(qb => {
+      const subqb = qb.clone().select(`${table}.id`).from(`${table}`).limit(1)
+
+      qb.where(`${table}.id`, subqb)
+    })
 
     return this
   }

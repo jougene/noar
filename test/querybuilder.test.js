@@ -20,4 +20,8 @@ describe('QueryBuilder', () => {
       assert.count(user.payments, 2)
     })
   })
+
+  it('first', async () => {
+    // const user = await User.with('payments').first()
+  })
 })

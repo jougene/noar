@@ -53,7 +53,7 @@ module.exports = async () => {
 
   await Promise.all([
     Payment.create({ amount: 10000, userId: user.id }),
-    Payment.create({ amount: 10000, userId: user2.id }),
+    Payment.create({ amount: 10000, userId: user.id }),
     Payment.create({ amount: 10000 }),
     Payment.create({ amount: 10000, userId: user2.id }),
     Payment.create({
