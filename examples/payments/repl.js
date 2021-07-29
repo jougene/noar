@@ -4,6 +4,8 @@ const load = require('./load')
 const User = require('./User')
 const Payment = require('./Payment')
 
+const Transaction = require('../../src/transaction/Transaction')
+
 ;(async () => {
   await load()
 
@@ -17,4 +19,10 @@ const Payment = require('./Payment')
 
   server.context.User = User
   server.context.Payment = Payment
+  server.context.Tx = Transaction
+
+  server.context.cb = async () => {
+    const user = await User.insert({ name: 'Eugene', email: 'test@email.com' })
+    await Payment.create({ amount: 10000, userId: user.id })
+  }
 })()

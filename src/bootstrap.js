@@ -2,7 +2,9 @@ const _ = require('lodash')
 const fs = require('fs').promises
 const path = require('path')
 const knex = require('knex')
+
 const BaseModel = require('./Model')
+const Transaction = require('./transaction/Transaction')
 const QueryBuilder = require('./QueryBuilder')
 const Mapper = require('./Mapper')
 
@@ -45,6 +47,7 @@ const bootstrap = async (config) => {
   }
 
   BaseModel.db = connection
+  Transaction.db = connection
 
   await Promise.all(models.map(async model => {
     model.metadata = {}

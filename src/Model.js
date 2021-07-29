@@ -3,6 +3,7 @@ const { singularize } = require('inflected')
 const joi = require('joi')
 
 const QueryBuilder = require('./QueryBuilder')
+const als = require('./transaction/LocalStorage')
 const { assert, snakeizeKeys } = require('./helpers')
 const { entries, keys, assign } = Object
 
@@ -38,7 +39,9 @@ class Model {
   }
 
   static get qb () {
-    return this.db(this.table)
+    const trx = als.getStore()
+
+    return trx ? trx(this.table) : this.db(this.table)
   }
 
   static all () {
