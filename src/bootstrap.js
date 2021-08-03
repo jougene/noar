@@ -1,4 +1,5 @@
 const _ = require('lodash')
+const { pluralize } = require('inflected')
 const fs = require('fs').promises
 const path = require('path')
 const knex = require('knex')
@@ -51,6 +52,8 @@ const bootstrap = async (config) => {
 
   await Promise.all(models.map(async model => {
     model.metadata = {}
+    model.table = model.table || pluralize(_.snakeCase(model.name))
+
     const columnInfo = await connection(model.table).queryContext({ system: true }).columnInfo()
     model.metadata.columns = Object.keys(columnInfo)
 

@@ -12,16 +12,28 @@ class QueryBuilder {
     })
   }
 
-  first () {
+  async first () {
     const table = this.model.table
 
-    this.qb = this.qb.where(qb => {
+    const [result] = await this.where(qb => {
       const subqb = qb.clone().select(`${table}.id`).from(`${table}`).limit(1)
 
       qb.where(`${table}.id`, subqb)
     })
 
-    return this
+    return result
+  }
+
+  async last () {
+    const table = this.model.table
+
+    const [result] = await this.where(qb => {
+      const subqb = qb.clone().select(`${table}.id`).from(`${table}`).orderBy('id', 'desc').limit(1)
+
+      qb.where(`${table}.id`, subqb)
+    })
+
+    return result
   }
 
   async find (id) {

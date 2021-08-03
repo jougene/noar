@@ -52,6 +52,10 @@ class Model {
     return new QueryBuilder(this, this.qb).first()
   }
 
+  static last () {
+    return new QueryBuilder(this, this.qb).last()
+  }
+
   static find (id) {
     return new QueryBuilder(this, this.qb).find(id)
   }

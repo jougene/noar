@@ -1,8 +1,6 @@
 const Model = require('../../src/Model')
 
 class Payment extends Model {
-  static table = 'payments'
-
   static defaults = {
     status: 'new'
   }
