@@ -1,8 +1,13 @@
 {
   "name": "@jougene/noar",
-  "version": "0.0.1",
+  "version": "0.1.1",
   "author": "Eugene Sinitsyn",
-  "keywords": ["knex", "activerecord", "orm", "rails"],
+  "keywords": [
+    "knex",
+    "activerecord",
+    "orm",
+    "rails"
+  ],
   "description": "NodeJS ActiveRecord",
   "homepage": "https://github.com/jougene/noar#readme",
   "main": "src/index.js",
