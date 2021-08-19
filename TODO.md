@@ -1,6 +1,5 @@
 - remove nullable from related selections
-- first in querybuilder works incorrect
-- all other knex functions - orderBy etc...
+- add nested relations in WITH method
 
 - docs
 - transactions

@@ -48,4 +48,6 @@ describe('Scopes', () => {
     assert(_.isEqual(chargedWithUser, expectedCharged), 'Objects are not equal')
     chargedWithUser.map(payment => assert.instanceOf(payment.user, User))
   })
+
+  it('scopy by relation', async () => {})
 })

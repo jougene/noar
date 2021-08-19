@@ -119,6 +119,12 @@ class Model {
     return this.properties.includes(name)
   }
 
+  static assertProperties (...names) {
+    return names.forEach(name => {
+      assert(this.hasProperty(name), `${this.name} model does not have propery "${name}"`)
+    })
+  }
+
   async reload () {}
 
   async save () {

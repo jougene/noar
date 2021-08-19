@@ -28,4 +28,12 @@ describe('QueryBuilder', () => {
 
     console.log(user)
   })
+
+  it('where by relations without loading it', async () => {
+
+  })
+
+  describe('select', () => {
+    it('select only own model fields', async () => {})
+  })
 })
