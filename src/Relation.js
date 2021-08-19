@@ -14,6 +14,8 @@ class Relation {
     this.options = options
   }
 
+  resolveSelects () {}
+
   assertType (type) {}
 }
 

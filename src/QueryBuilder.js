@@ -183,6 +183,12 @@ class QueryBuilder {
 
   // Make query builder thenable, so you can await it
   then (fn) {
+    const hasSelects = this.qb._statements.some(s => s.grouping === 'columns')
+
+    if (!hasSelects) {
+      // add all selects for all loaded relations
+    }
+
     // check if not custom selects, IF NOT -> select all with all relations
     return fn(this.qb.queryContext({ model: this.model }))
   }
