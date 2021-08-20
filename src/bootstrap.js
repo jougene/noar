@@ -74,7 +74,7 @@ const bootstrap = async (config) => {
     }, {})
 
     Object.defineProperty(model, 'relations', {
-      get: function () {
+      get () {
         return normalizedRelations
       }
     })

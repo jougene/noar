@@ -1,5 +1,5 @@
 const User = require('./User')
-const UserPersonal = require('./UserPersonal')
+const UserPersonalData = require('./UserPersonalData')
 const Payment = require('./Payment')
 
 const { connect, bootstrap } = require('../../src/bootstrap')
@@ -42,7 +42,7 @@ module.exports = async () => {
     t.foreign('user_id').references('id').inTable('users')
   })
 
-  await bootstrap(({ models: [User, UserPersonal, Payment] }))
+  await bootstrap(({ models: [User, UserPersonalData, Payment] }))
 
   const users = await Promise.all([
     User.insert({ name: 'Eugene', email: 'test@email.com' }),
@@ -50,6 +50,10 @@ module.exports = async () => {
   ])
 
   const [user, user2] = users
+
+  await Promise.all([
+    UserPersonalData.create({ firstname: 'Ivan', lastname: 'Ivanov', userId: user.id })
+  ])
 
   await Promise.all([
     Payment.create({ amount: 10000, userId: user.id }),

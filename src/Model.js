@@ -60,6 +60,10 @@ class Model {
     return new QueryBuilder(this, this.qb).find(id)
   }
 
+  static select (...selects) {
+    return new QueryBuilder(this, this.qb).select(...selects)
+  }
+
   static where (...args) {
     // add correct relations
     return new QueryBuilder(this, this.qb).where(...args)
@@ -119,7 +123,7 @@ class Model {
     return this.properties.includes(name)
   }
 
-  static assertProperties (...names) {
+  static assertProperties (names) {
     return names.forEach(name => {
       assert(this.hasProperty(name), `${this.name} model does not have propery "${name}"`)
     })

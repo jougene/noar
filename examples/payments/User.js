@@ -10,11 +10,15 @@ class User extends Model {
   static get relations () {
     return {
       payments: { hasMany: require('./Payment') },
-      personal: { hasOne: require('./UserPersonal') }
+      personalData: { hasOne: require('./UserPersonalData') }
     }
   }
 
   static validations = {}
+
+  static withPersonalData () {
+    return this.with('personalData')
+  }
 
   get fullname () {
     return 'test'

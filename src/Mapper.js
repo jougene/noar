@@ -21,16 +21,17 @@ class Mapper {
     })
 
     const merged = camelCased.reduce((acc, item) => {
-      const existed = acc.find(a => a.id === item.id)
-      if (existed) {
-        this.model.relationNames.forEach(name => {
-          if (existed[name]) {
-            existed[name] = existed[name].concat(item[name])
-          }
-        })
-      } else {
-        acc.push(item)
+      const existed = acc.find(a => a.id && a.id === item.id)
+
+      if (!existed) {
+        return acc.concat(item)
       }
+
+      this.model.relationNames.forEach(name => {
+        if (existed[name]) {
+          existed[name] = existed[name].concat(item[name])
+        }
+      })
 
       return acc
     }, [])
@@ -55,15 +56,21 @@ class Mapper {
     const relations = Object.entries(grouped).reduce((acc, [name, keys]) => {
       const values = keys.reduce((acc, key) => {
         const [, cleanedKey] = key.split('__')
+
         return { ...acc, [cleanedKey]: item[key] }
       }, {})
 
       const relation = Object.values(this.model.relations).find(r => r.model.table === pluralize(name))
       const relationType = relation.type
 
+      if (relationType === 'hasOne' && values.id === null) {
+        return acc
+      }
+
+      // TODO move to Relation class
       const relationValues = {
         hasOne: camelizeKeys(values),
-        hasMany: [camelizeKeys(values)],
+        hasMany: values.id === null ? [] : [camelizeKeys(values)],
         belongsTo: camelizeKeys(values)
       }[relationType]
 

@@ -1,5 +1,5 @@
-- remove nullable from related selections
 - add nested relations in WITH method
+- add hasManyThrough hasOneThrough and belongsToThrough relations
 
 - docs
 - transactions
