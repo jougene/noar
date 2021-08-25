@@ -1,7 +1,7 @@
 const assert = require('assert')
 const _ = require('lodash')
 const { singularize } = require('inflected')
-const { entries, keys, assign } = Object
+const { entries } = Object
 
 const consts = require('./consts')
 
@@ -14,7 +14,7 @@ class QueryBuilder {
 
     // Add all scopes back to query builder for chaining works!
     entries(model.scopes || {}).forEach(([key, fn]) => {
-      this[key] = () => fn(new QueryBuilder(model, this.qb))
+      this[key] = (...params) => fn(new QueryBuilder(model, this.qb), ...params)
     })
   }
 
@@ -98,7 +98,12 @@ class QueryBuilder {
 
     const wheres = entries(args).reduce((acc, [key, value]) => {
       if (this.model.hasProperty(key)) {
-        acc[`${this.model.table}.${_.snakeCase(key)}`] = value
+        const column = `${this.model.table}.${_.snakeCase(key)}`
+
+        const operator = Array.isArray(value) ? value[0] : '='
+        value = Array.isArray(value) ? value[1] : value
+
+        acc.push([column, operator, value])
 
         return acc
       }
@@ -107,7 +112,12 @@ class QueryBuilder {
         const relation = this.model.relations[key]
 
         entries(value).forEach(([key, value]) => {
-          acc[`${relation.model.table}.${_.snakeCase(key)}`] = value
+          const column = `${relation.model.table}.${_.snakeCase(key)}`
+
+          const operator = Array.isArray(value) ? value[0] : '='
+          value = Array.isArray(value) ? value[1] : value
+
+          acc.push([column, operator, value])
         })
 
         return acc
@@ -116,15 +126,15 @@ class QueryBuilder {
       throw new Error(`Unknown property or relation [ ${key} ] of model ${this.model.name}`)
     }, [])
 
-    this.qb.where(wheres)
+    wheres
+      .filter(w => !_.isNil(w[2]))
+      .forEach(where => this.qb.where(...where))
 
     return this
   }
 
   whereIn (args) {
     this.qb = entries(args).reduce((qb, [key, value]) => {
-      console.log({ key, value })
-
       if (this.model.hasProperty(key)) {
         return qb.whereIn(`${this.model.table}.${_.snakeCase(key)}`, value)
       }
@@ -200,7 +210,7 @@ class QueryBuilder {
   orderBy (by) {
     const [column, order] = by
 
-    this.qb.orderBy(`${this.model.table}.${column}`, order)
+    this.qb.orderBy(`${this.model.table}.${_.snakeCase(column)}`, order)
 
     return this
   }

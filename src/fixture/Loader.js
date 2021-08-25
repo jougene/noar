@@ -1,5 +1,5 @@
-class Loader {
+class FixtureLoader {
 
 }
 
-module.exports = Loader
+module.exports = FixtureLoader

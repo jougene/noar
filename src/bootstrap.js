@@ -61,7 +61,8 @@ const bootstrap = async (config) => {
     const { scopes = {} } = model
 
     Object.entries(scopes).forEach(([key, fn]) => {
-      model[key] = () => fn(new QueryBuilder(model, model.qb))
+      // now last scope override previos ones
+      model[key] = (...params) => fn(new QueryBuilder(model, model.qb), ...params)
     })
 
     // relations (restructure relation key to object)
