@@ -81,6 +81,14 @@ const bootstrap = async (config) => {
     })
   }))
 
+  const factories = config.factories
+
+  const f = await fs.readdir(factories.dir).then(factoryFiles => {
+    factoryFiles.map(f => require(path.resolve(factories.dir, f)))
+  })
+
+  console.log(f)
+
   return { models }
 }
 

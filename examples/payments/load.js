@@ -1,3 +1,5 @@
+const path = require('path')
+
 const User = require('./User')
 const UserPersonalData = require('./UserPersonalData')
 const Payment = require('./Payment')
@@ -42,7 +44,12 @@ module.exports = async () => {
     t.foreign('user_id').references('id').inTable('users')
   })
 
-  await bootstrap(({ models: [User, UserPersonalData, Payment] }))
+  await bootstrap(({
+    models: [User, UserPersonalData, Payment],
+    factories: {
+      dir: path.resolve(__dirname, './factories')
+    }
+  }))
 
   const users = await Promise.all([
     User.insert({ name: 'Eugene', email: 'test@email.com' }),

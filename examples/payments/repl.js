@@ -5,6 +5,7 @@ const User = require('./User')
 const Payment = require('./Payment')
 
 const Transaction = require('../../src/transaction/Transaction')
+const Factory = require('../../src/factory')
 
 ;(async () => {
   await load()
@@ -20,6 +21,7 @@ const Transaction = require('../../src/transaction/Transaction')
   server.context.User = User
   server.context.Payment = Payment
   server.context.Tx = Transaction
+  server.context.Factory = Factory
 
   server.context.cb = async () => {
     const user = await User.insert({ name: 'Eugene', email: 'test@email.com' })

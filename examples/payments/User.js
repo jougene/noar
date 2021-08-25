@@ -14,7 +14,7 @@ class User extends Model {
     }
   }
 
-  static validations = {}
+  // static validations = {}
 
   static withPersonalData () {
     return this.with('personalData')
