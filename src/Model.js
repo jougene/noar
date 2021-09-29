@@ -28,7 +28,7 @@ class Model {
           this[name] = new RelationClass(value)
         }
 
-        if (relationType === 'hasMany') {
+        if (relationType === 'hasManyThrough' || relationType === 'hasMany') {
           // check that value is array
           this[name] = value.map(v => new RelationClass(v))
         }

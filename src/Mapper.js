@@ -63,14 +63,19 @@ class Mapper {
       const relation = Object.values(this.model.relations).find(r => r.model.table === pluralize(name))
       const relationType = relation.type
 
-      if (relationType === 'hasOne' && values.id === null) {
+      // when left joins and there is no values
+      const isValuesEmpty = Object.values(values).every(_.isNull)
+
+      // TODO replace ".id" to get some primary
+      if (relationType === 'hasOne' && isValuesEmpty) {
         return acc
       }
 
       // TODO move to Relation class
       const relationValues = {
         hasOne: camelizeKeys(values),
-        hasMany: values.id === null ? [] : [camelizeKeys(values)],
+        hasMany: isValuesEmpty ? [] : [camelizeKeys(values)],
+        hasManyThrough: isValuesEmpty ? [] : [camelizeKeys(values)],
         belongsTo: camelizeKeys(values)
       }[relationType]
 

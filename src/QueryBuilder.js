@@ -74,6 +74,18 @@ class QueryBuilder {
         return qb.leftJoin(relation.model.table, selfKey, foreignKey)
       }
 
+      if (relation.type === 'hasManyThrough') {
+        const pivotTable = relation.through.table || relation.through
+        const relationTable = relation.model.table
+        const selfKey = `${this.model.table}.id`
+
+        const foreignKey = `${pivotTable}.${singularize(this.model.table)}_id`
+
+        return qb
+          .leftJoin(pivotTable, selfKey, foreignKey)
+          .join(relationTable, `${pivotTable}.id`, `${relationTable}.${singularize(pivotTable)}_id`)
+      }
+
       if (relation.type === 'belongsTo') {
         const foreignKey = relation.join || `${singularize(relation.model.table)}_id`
 
@@ -242,7 +254,7 @@ class QueryBuilder {
         return qb.select(foreignSelects)
       }
 
-      if (relation.type === 'hasMany') {
+      if (relation.type === 'hasMany' || relation.type === 'hasManyThrough') {
         const foreignSelects = relation.model.metadata.columns.map(c => `${relation.model.table}.${c} as ${relation.model.table}__${c}`)
 
         return qb.select(foreignSelects)

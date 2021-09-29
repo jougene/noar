@@ -69,7 +69,13 @@ const bootstrap = async (config) => {
     const { relations = {} } = model
     const normalizedRelations = Object.entries(relations).reduce((acc, [key, rel]) => {
       const type = Object.keys(rel)[0]
-      const normalizedRelation = { type, name: key, model: rel[type], join: rel.join }
+      const normalizedRelation = {
+        type,
+        name: key,
+        model: rel[type],
+        join: rel.join, // TODO replace here to relation class
+        through: rel.through // TODO same here
+      }
 
       return { ...acc, ...{ [key]: normalizedRelation } }
     }, {})
@@ -83,11 +89,9 @@ const bootstrap = async (config) => {
 
   const factories = config.factories
 
-  const f = await fs.readdir(factories.dir).then(factoryFiles => {
+  factories && await fs.readdir(factories.dir).then(factoryFiles => {
     factoryFiles.map(f => require(path.resolve(factories.dir, f)))
   })
-
-  console.log(f)
 
   return { models }
 }
