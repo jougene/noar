@@ -1,10 +1,11 @@
 <div align="center">
-  <img width="500" src="https://user-images.githubusercontent.com/13833179/120039872-46830980-c00e-11eb-9f2d-0949276cf6d1.jpg" alt="John Doe">
+  <img width="400" src="https://user-images.githubusercontent.com/13833179/120039872-46830980-c00e-11eb-9f2d-0949276cf6d1.jpg" alt="John Doe">
 </div>
 
 # NodeJS ActiveRecord
 
 [![build](https://travis-ci.com/jougene/noar.svg?branch=main)](https://travis-ci.com/github/jougene/noar)
+[![codebeat badge](https://codebeat.co/badges/f31ede91-0de7-4f12-92f2-523ce5c1aee7)](https://codebeat.co/projects/github-com-jougene-noar-main)
 [![js-standard-style](https://img.shields.io/badge/code%20style-standard-brightgreen.svg)](http://standardjs.com)
 
 ## Demo
