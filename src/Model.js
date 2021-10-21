@@ -82,7 +82,13 @@ class Model {
 
     const rawData = { ...this.defaults, ...snakeizeKeys(data) }
 
-    const [id] = await this.qb.insert(rawData)
+    let id
+
+    if (this.db.client.driverName === 'pg') {
+      id = await this.qb.insert(rawData).returning('id')
+    } else {
+      id = await this.qb.insert(rawData)
+    }
 
     return new QueryBuilder(this, this.qb).find(id)
   }
