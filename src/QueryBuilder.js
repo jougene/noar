@@ -11,6 +11,7 @@ class QueryBuilder {
   constructor (model, qb) {
     this.model = model
     this.qb = qb
+    this.db = model.db
 
     // Add all scopes back to query builder for chaining works!
     entries(model.scopes || {}).forEach(([key, fn]) => {
@@ -18,28 +19,13 @@ class QueryBuilder {
     })
   }
 
-  async first () {
-    const table = this.model.table
-
-    const [result] = await this.where(qb => {
-      const subqb = qb.clone().select(`${table}.id`).from(`${table}`).limit(1)
-
-      qb.where(`${table}.id`, subqb)
-    })
-
-    return result
+  first () {
+    return this.limit(1)
   }
 
-  async last () {
-    const table = this.model.table
-
-    const [result] = await this.where(qb => {
-      const subqb = qb.clone().select(`${table}.id`).from(`${table}`).orderBy('id', 'desc').limit(1)
-
-      qb.where(`${table}.id`, subqb)
-    })
-
-    return result
+  // TODO add default order by
+  last () {
+    return this.orderBy(['id', 'desc']).limit(1)
   }
 
   async find (id) {
@@ -49,6 +35,8 @@ class QueryBuilder {
   }
 
   with (...relationsNames) {
+    const selfTable = this.model.table
+
     this.qb = relationsNames.reduce((qb, name) => {
       if (!this.model.hasRelation(name)) {
         throw new Error(`Unknown relation "${name}". Available relations for this model: [${this.model.relationNames.join(', ')}]`)
@@ -59,17 +47,15 @@ class QueryBuilder {
       const relation = this.model.relations[name]
 
       if (relation.type === 'hasOne') {
-        let foreignKey = relation.join || `${singularize(this.model.table)}_id`
-        foreignKey = `${relation.model.table}.${foreignKey}`
-
-        const selfKey = `${this.model.table}.id`
+        const foreignKey = `${relation.model.table}.id`
+        const selfKey = `${selfTable}.${relation.name}_id`
 
         return qb.leftJoin(relation.model.table, selfKey, foreignKey)
       }
 
       if (relation.type === 'hasMany') {
-        const foreignKey = `${relation.model.table}.${singularize(this.model.table)}_id`
-        const selfKey = `${this.model.table}.id`
+        const foreignKey = `${relation.model.table}.${singularize(selfTable)}_id`
+        const selfKey = `${selfTable}.id`
 
         return qb.leftJoin(relation.model.table, selfKey, foreignKey)
       }
@@ -77,9 +63,9 @@ class QueryBuilder {
       if (relation.type === 'hasManyThrough') {
         const pivotTable = relation.through.table || relation.through
         const relationTable = relation.model.table
-        const selfKey = `${this.model.table}.id`
+        const selfKey = `${selfTable}.id`
 
-        const foreignKey = `${pivotTable}.${singularize(this.model.table)}_id`
+        const foreignKey = `${pivotTable}.${singularize(selfTable)}_id`
 
         return qb
           .leftJoin(pivotTable, selfKey, foreignKey)
@@ -89,7 +75,7 @@ class QueryBuilder {
       if (relation.type === 'belongsTo') {
         const foreignKey = relation.join || `${singularize(relation.model.table)}_id`
 
-        return qb.join(relation.model.table, `${this.model.table}.${foreignKey}`, `${relation.model.table}.id`)
+        return qb.join(relation.model.table, `${selfTable}.${foreignKey}`, `${relation.model.table}.id`)
       }
 
       return qb
@@ -165,10 +151,6 @@ class QueryBuilder {
     return this
   }
 
-  /**
-   * selects can bet array of strings
-   * OR object
-   */
   select (...selects) {
     const selfTable = this.model.table
 
@@ -198,9 +180,17 @@ class QueryBuilder {
 
         relation.model.assertProperties(columns)
 
-        const relationSelects = columns.map(c => `${table}.${_.snakeCase(c)} as ${singularize(table)}__${c}`)
+        const pairs = columns.map(c => [`'${c}'`, `${table}.${c}`]).flat()
 
-        return qb.select(relationSelects)
+        if (relation.type === 'belongsTo' || relation.type === 'hasOne') {
+          const relationSelects = `to_jsonb(json_build_object(${pairs.join(', ')})) as ${relation.name}`
+
+          return qb.select(this.db.raw(relationSelects))
+        }
+
+        const relationSelects = `jsonb_agg(json_build_object(${pairs.join(', ')})) as ${relation.name}`
+
+        return qb.select(this.db.raw(relationSelects)).groupBy(`${this.model.table}.id`)
       }
     }, this.qb)
 
@@ -220,6 +210,10 @@ class QueryBuilder {
   }
 
   orderBy (by) {
+    if (!Array.isArray(by)) {
+      by = [by, 'asc']
+    }
+
     const [column, order] = by
 
     this.qb.orderBy(`${this.model.table}.${_.snakeCase(column)}`, order)
@@ -249,21 +243,25 @@ class QueryBuilder {
       const relation = this.model.relations[relationName]
 
       if (relation.type === 'hasOne') {
-        const foreignSelects = relation.model.metadata.columns.map(c => `${relation.model.table}.${c} as ${relation.model.table}__${c}`)
+        const alias = `${this.model.table}__${relation.name}`
+        const foreignSelects = `to_jsonb(${relation.model.table}.*) as ${alias}`
 
-        return qb.select(foreignSelects)
+        return qb.select(this.db.raw(foreignSelects))
       }
 
       if (relation.type === 'hasMany' || relation.type === 'hasManyThrough') {
-        const foreignSelects = relation.model.metadata.columns.map(c => `${relation.model.table}.${c} as ${relation.model.table}__${c}`)
+        const alias = `${this.model.table}__${relation.name}`
 
-        return qb.select(foreignSelects)
+        const foreignSelects = `jsonb_agg(${relation.model.table}.*) as ${alias}`
+
+        return qb.select(this.db.raw(foreignSelects)).groupBy('users.id')
       }
 
       if (relation.type === 'belongsTo') {
-        const foreignSelects = relation.model.metadata.columns.map(c => `${relation.model.table}.${c} as ${singularize(relation.model.table)}__${c}`)
+        const alias = `${this.model.table}__${relation.name}`
+        const foreignSelects = `to_jsonb(${relation.model.table}.*) as ${alias}`
 
-        return qb.select(foreignSelects)
+        return qb.select(this.db.raw(foreignSelects))
       }
 
       return qb

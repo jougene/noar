@@ -93,6 +93,12 @@ const bootstrap = async (config) => {
     factoryFiles.map(f => require(path.resolve(factories.dir, f)))
   })
 
+  models = models.reduce((acc, model) => {
+    acc[model.name] = model
+
+    return acc
+  }, {})
+
   return { models }
 }
 

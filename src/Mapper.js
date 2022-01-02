@@ -1,6 +1,5 @@
 const _ = require('lodash')
 const { camelizeKeys } = require('./helpers')
-const { pluralize } = require('inflected')
 
 class Mapper {
   constructor (model) {
@@ -12,31 +11,7 @@ class Mapper {
       return this.mapOne(result)
     }
 
-    return this.mapMany(result)
-  }
-
-  mapMany (rows) {
-    const camelCased = rows.map(item => {
-      return this.mapOne(item)
-    })
-
-    const merged = camelCased.reduce((acc, item) => {
-      const existed = acc.find(a => a.id && a.id === item.id)
-
-      if (!existed) {
-        return acc.concat(item)
-      }
-
-      this.model.relationNames.forEach(name => {
-        if (existed[name]) {
-          existed[name] = existed[name].concat(item[name])
-        }
-      })
-
-      return acc
-    }, [])
-
-    return merged
+    return result.map(item => this.mapOne(item))
   }
 
   mapOne (item) {
@@ -44,47 +19,41 @@ class Mapper {
       return item
     }
 
-    const plainKeys = Object.keys(item).filter(k => !k.includes('__'))
-    const relationsKeys = Object.keys(item).filter(k => k.includes('__'))
+    const Model = this.model
+    const table = Model.table
 
-    const grouped = _.groupBy(relationsKeys, k => {
-      const [name] = k.split('__')
+    const fields = Object.keys(item)
+    const relationFields = fields.filter(f => f.startsWith(`${table}__`))
+    const selfFields = _.difference(fields, relationFields)
 
-      return name
-    })
+    const relations = relationFields.reduce((acc, f) => {
+      const [, name] = f.split('__')
 
-    const relations = Object.entries(grouped).reduce((acc, [name, keys]) => {
-      const values = keys.reduce((acc, key) => {
-        const [, cleanedKey] = key.split('__')
+      acc[name] = item[f]
 
-        return { ...acc, [cleanedKey]: item[key] }
-      }, {})
-
-      const relation = Object.values(this.model.relations).find(r => r.model.table === pluralize(name))
-      const relationType = relation.type
-
-      // when left joins and there is no values
-      const isValuesEmpty = Object.values(values).every(_.isNull)
-
-      // TODO replace ".id" to get some primary
-      if (relationType === 'hasOne' && isValuesEmpty) {
-        return acc
-      }
-
-      // TODO move to Relation class
-      const relationValues = {
-        hasOne: camelizeKeys(values),
-        hasMany: isValuesEmpty ? [] : [camelizeKeys(values)],
-        hasManyThrough: isValuesEmpty ? [] : [camelizeKeys(values)],
-        belongsTo: camelizeKeys(values)
-      }[relationType]
-
-      return { ...acc, ...{ [relation.name]: relationValues } }
+      return acc
     }, {})
 
-    const Model = this.model
+    const selfProps = camelizeKeys(_.pick(item, selfFields))
 
-    return new Model({ ...camelizeKeys(_.pick(item, plainKeys)), ...relations })
+    const relationProps = Object.entries(relations).reduce((acc, [name, value]) => {
+      const { type } = this.model.relations[name]
+
+      const relationValues = {
+        hasOne: () => camelizeKeys(value),
+        hasMany: () => value.filter(v => v !== null).map(camelizeKeys),
+        hasManyThrough: () => value.filter(v => v !== null).map(camelizeKeys),
+        belongsTo: () => camelizeKeys(value)
+      }[type]
+
+      acc[name] = relationValues()
+
+      return acc
+    }, {})
+
+    const props = { ...selfProps, ...relationProps }
+
+    return new Model(props)
   }
 
   /**

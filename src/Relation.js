@@ -1,9 +1,5 @@
-// const TYPES = {
-// HAS_ONE: 'hasOne',
-// BELONGS_TO: 'belongsTo',
-// HAS_MANY: 'hasMany',
-// HAS_MANY_THROUGH: 'hasManyThrough'
-// }
+// add subclass for all type of relations
+// class BelongsTo {}
 
 class Relation {
   constructor (type, name, model, options = {}) {
@@ -12,6 +8,12 @@ class Relation {
     this.model = model
 
     this.options = options
+  }
+
+  // resolve()
+
+  resolveJoins () {
+
   }
 
   resolveSelects () {}

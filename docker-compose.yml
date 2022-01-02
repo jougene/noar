@@ -1,0 +1,13 @@
+version: '3.5'
+
+services:
+  db:
+    image: postgres:12.7
+    ports:
+      - 55432:5432
+    volumes:
+      - ./init.sql:/docker-entrypoint-initdb.d/init.sql
+    environment:
+      - POSTGRES_PASSWORD=noar
+      - POSTGRES_USER=noar
+      - POSTGRES_DB=noar

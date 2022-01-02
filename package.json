@@ -20,6 +20,8 @@
     "examples:payments:repl": "nodemon --experimental-repl-await examples/payments/repl.js",
     "examples:payments:repl:debug": "DEBUG=knex:query,knex:bindings nodemon --experimental-repl-await examples/payments/repl.js",
     "examples:bookings:repl": "nodemon --experimental-repl-await examples/bookings/repl.js",
+    "examples:blog:repl": "nodemon --experimental-repl-await examples/blog/repl.js",
+    "examples:blog:repl:debug": "DEBUG=knex:query,knex:bindings nodemon --experimental-repl-await examples/blog/repl.js",
     "test": "mocha test/**/*.test.js"
   },
   "repository": {
@@ -47,8 +49,7 @@
     "mocha": "^8.3.2",
     "module-alias": "^2.2.2",
     "nodemon": "^2.0.7",
-    "pg": "^8.6.0",
-    "sqlite3": "^5.0.2"
+    "pg": "^8.6.0"
   },
   "nodemonConfig": {
     "restartable": false
