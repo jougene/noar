@@ -21,6 +21,8 @@ const Factory = require('../../src/factory')
     server.context[name] = model
   })
 
+  server.context.user = await models.User.last()
+
   // server.context.User = User
   server.context.Tx = Transaction
   server.context.Factory = Factory

@@ -39,11 +39,15 @@ class Mapper {
     const relationProps = Object.entries(relations).reduce((acc, [name, value]) => {
       const { type } = this.model.relations[name]
 
+      if (value === null) {
+        return acc
+      }
+
       const relationValues = {
         hasOne: () => camelizeKeys(value),
         hasMany: () => value.filter(v => v !== null).map(camelizeKeys),
         hasManyThrough: () => value.filter(v => v !== null).map(camelizeKeys),
-        belongsTo: () => camelizeKeys(value)
+        belongsTo: () => value ? camelizeKeys(value) : null
       }[type]
 
       acc[name] = relationValues()

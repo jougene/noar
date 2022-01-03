@@ -1,6 +1,6 @@
 const { assert } = require('../src/helpers')
-const User = require('./models/User')
-const Payment = require('./models/Payment')
+const User = require('../examples/blog/models/User')
+const Post = require('../examples/blog/models/Post')
 
 describe('QueryBuilder', () => {
   describe('with', () => {
@@ -10,23 +10,25 @@ describe('QueryBuilder', () => {
       const { id } = await User.create({
         name: 'Test',
         email: 'test2@test.com',
-        payments: [
-          new Payment({ amount: 99 }),
-          new Payment({ amount: 101 })
+        age: 27,
+        posts: [
+          new Post({ title: 'raz', text: 'dva' }),
+          new Post({ title: 'raz', text: 'dva' })
         ]
       })
 
-      user = await User.with('payments').find(id)
+      user = await User.with('posts').find(id)
 
       assert.ok(user)
-      assert.count(user.payments, 2)
+      assert.count(user.posts, 2)
     })
   })
 
   it('first', async () => {
-    const user = await User.with('payments').first()
+    const user = await User.with('posts').first()
 
-    console.log(user)
+    assert.ok(user)
+    assert.ok(user.id)
   })
 
   it('where by relations without loading it', async () => {

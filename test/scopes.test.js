@@ -1,53 +1,48 @@
 const _ = require('lodash')
 const { assert } = require('../src/helpers')
-const User = require('./models/User')
-const Payment = require('./models/Payment')
+const User = require('../examples/blog/models/User')
+const Post = require('../examples/blog/models/Post')
 
 describe('Scopes', () => {
-  let payments
+  let posts
 
   before(async () => {
-    const user = await User.create({ name: 'test', email: 'test@mail.com' })
+    const user = await User.create({ name: 'test', email: 'test@mail.com', age: 27 })
 
-    payments = await Promise.all([
-      Payment.create({ amount: 10, user }),
-      Payment.create({ amount: 20, user }),
-      Payment.create({ amount: 30, user, status: 'charged' }),
-      Payment.create({ amount: 10, user, status: 'charged' })
+    posts = await Promise.all([
+      Post.create({ title: 'raz', text: 'dva', user }),
+      Post.create({ title: 'raz', text: 'dva', user }),
+      Post.create({ title: 'raz', text: 'dva', status: 'published', user }),
+      Post.create({ title: 'raz', text: 'dva', status: 'published', user })
     ])
   })
 
   it('simple', async () => {
-    const chargedPayments = await Payment.charged()
+    const posts = await Post.published()
 
-    const expectedCharged = payments.filter(p => p.status === 'charged').map(p => {
-      // remove user property for correct assertion
-      const { user, ...payment } = p
+    const statuses = posts.map(p => p.status)
 
-      return new p.constructor(payment)
-    })
-
-    assert(_.isEqual(chargedPayments, expectedCharged), 'Objects are not equal')
+    assert(statuses.every(s => s === 'published'))
   })
 
-  it('combined with "with"', async () => {
-    const chargedWithUser = await Payment.with('user').charged()
+  // it('combined with "with"', async () => {
+  // const chargedWithUser = await Payment.with('user').charged()
 
-    const expectedCharged = payments.filter(p => p.status === 'charged')
+  // const expectedCharged = payments.filter(p => p.status === 'charged')
 
-    assert(_.isEqual(chargedWithUser, expectedCharged), 'Objects are not equal')
+  // assert(_.isEqual(chargedWithUser, expectedCharged), 'Objects are not equal')
 
-    chargedWithUser.map(payment => assert.instanceOf(payment.user, User))
-  })
+  // chargedWithUser.map(payment => assert.instanceOf(payment.user, User))
+  // })
 
-  it('combined with "with" but after scope function', async () => {
-    const chargedWithUser = await Payment.charged().with('user')
+  // it('combined with "with" but after scope function', async () => {
+  // const chargedWithUser = await Payment.charged().with('user')
 
-    const expectedCharged = payments.filter(p => p.status === 'charged')
+  // const expectedCharged = payments.filter(p => p.status === 'charged')
 
-    assert(_.isEqual(chargedWithUser, expectedCharged), 'Objects are not equal')
-    chargedWithUser.map(payment => assert.instanceOf(payment.user, User))
-  })
+  // assert(_.isEqual(chargedWithUser, expectedCharged), 'Objects are not equal')
+  // chargedWithUser.map(payment => assert.instanceOf(payment.user, User))
+  // })
 
   it('scopy by relation', async () => {})
 })

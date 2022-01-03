@@ -2,7 +2,7 @@ console.dump = (value) => {
   console.log(require('util').inspect(value, false, 5, true))
 }
 
-const _ = require('lodash')
+// const _ = require('lodash')
 const path = require('path')
 
 const { bootstrap } = require('../../src/bootstrap')
@@ -21,7 +21,7 @@ module.exports = async () => {
   }
 
   const { models } = await bootstrap(config)
-  const { User, Post, Comment } = models
+  // const { User, Post, Comment } = models
 
   // const [user1, user2] = await Promise.all([
   // User.insert({ name: 'Eugene', age: 27 }),

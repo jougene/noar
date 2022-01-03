@@ -1,4 +1,4 @@
-const assert = require('assert')
+const assert = require('assert').strict
 const _ = require('lodash')
 
 const camelizeKeys = (obj) => {
@@ -24,7 +24,7 @@ assert.instanceOf = (actual, klass) => {
 }
 
 assert.count = (array, count) => {
-  assert.equal(array.length, count)
+  assert.equal(array?.length ?? 0, count)
 }
 
 module.exports = { assert, camelizeKeys, snakeizeKeys }
